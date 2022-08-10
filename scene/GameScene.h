@@ -48,6 +48,8 @@ class GameScene {
 	/// </summary>
 	void Draw();
 
+	void CheckAllCollision(Player* player,Enemy* enemy);
+
   private: // メンバ変数
 	DirectXCommon* dxCommon_ = nullptr;
 	Input* input_ = nullptr;

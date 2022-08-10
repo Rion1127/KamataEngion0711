@@ -65,6 +65,10 @@ void Player::Draw(ViewProjection viewProjection_)
 		"player:(%f)", worldTransform_/*[PartID::Root]*/.rotation_.y);
 }
 
+void Player::OnCollisioin()
+{
+}
+
 void Player::Move()
 {
 	//キャラクターの移動ベクトル

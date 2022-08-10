@@ -18,8 +18,14 @@ public:
 	void Update();
 	//ワールド座標を取得
 	Vector3 GetWorldPosition();
+	WorldTransform GetWorldTransform() { return worldTransform_; }
 	//描画
 	void Draw(ViewProjection viewProjection_);
+
+	void OnCollisioin();
+
+	//弾リストを取得
+	const std::list<std::unique_ptr<PlayerBullet>>& GetBullets() { return bullets_; }
 
 private:
 	void Move();

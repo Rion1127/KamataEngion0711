@@ -16,8 +16,11 @@ public:
 	void Update();
 	//•`‰æ
 	void Draw(const ViewProjection& viewProjection);
+	WorldTransform GetWorldTransform() { return worldTransform_; }
 
 	bool IsDead() const { return isDead_; }
+
+	void OnCollisioin();
 
 private:
 	WorldTransform worldTransform_;

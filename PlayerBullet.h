@@ -19,6 +19,9 @@ public:
 
 	bool IsDead() const { return isDead_; }
 
+
+	void OnCollisioin();
+
 private:
 	WorldTransform worldTransform_;
 	Matrix matrix;

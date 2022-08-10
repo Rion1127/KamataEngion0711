@@ -71,7 +71,7 @@ void Enemy::Shot()
 	// 差分ベクトルの正規化
 	diffVec.normalize();
 
-	// ベクトルの長さを、速さに合わせる。( ←は？ )
+	// ベクトルの長さを、速さに合わせる。
 	diffVec *= kBulletSpped;
 
 	// 弾を生成し、初期化
@@ -79,6 +79,8 @@ void Enemy::Shot()
 	newBullet->Initialize(model_, worldTransform_.translation_, diffVec);
 	// 弾を登録する
 	bullets_.push_back(std::move(newBullet));
+
+	
 }
 
 Vector3 Enemy::GetWorldPosition()
@@ -112,9 +114,13 @@ void Enemy::Draw(const ViewProjection& viewProjection)
 		phase_);
 }
 
+void Enemy::OnCollisioin()
+{
+}
+
 void Enemy::phase_Approach()
 {
-	speed = { 0,0,-0.1f };
+	speed = { 0,0,-0.001f };
 	//移動（ベクトルを加算）
 	worldTransform_.translation_ += speed;
 
@@ -126,6 +132,10 @@ void Enemy::phase_Approach()
 		//発射タイマーの初期化
 		shotCoolTime = kFireInterval;
 	}
+	//デスフラグの立った球を削除
+	bullets_.remove_if([](std::unique_ptr<EnemyBullet>& bullet) {
+		return bullet->IsDead();
+		});
 
 	//既定の位置に到達したら離脱
 	if (worldTransform_.translation_.z < 0.0f) {

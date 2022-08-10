@@ -5,6 +5,8 @@
 #include <cassert>
 #define XM_PI 3.141592
 
+bool BallCollision(WorldTransform a, WorldTransform b);
+
 GameScene::GameScene() {}
 
 GameScene::~GameScene()
@@ -87,6 +89,8 @@ void GameScene::Update()
 		enemy_->Update();
 	}
 
+	CheckAllCollision(player_, enemy_);
+
 
 }
 
@@ -138,4 +142,60 @@ void GameScene::Draw() {
 	Sprite::PostDraw();
 
 #pragma endregion
+}
+
+void GameScene::CheckAllCollision(Player* player, Enemy* enemy)
+{
+	//判定対象AとBの座標
+	Vector3 posA, posB;
+
+	//自弾リストの取得
+	const std::list<std::unique_ptr<PlayerBullet>>& playerBullets = player->GetBullets();
+	//敵弾リストの取得
+	const std::list<std::unique_ptr<EnemyBullet>>& enemyBullets = enemy->GetBullets();
+
+#pragma region 自キャラと敵弾の当たり判定
+	//自キャラの座標
+	posA = player->GetWorldPosition();
+	//自キャラと敵弾すべての当たり判定
+	for (const std::unique_ptr<EnemyBullet>& bullet : enemyBullets) {
+		//敵弾の座標
+		posB = enemy->GetWorldPosition();
+
+		if (BallCollision(player->GetWorldTransform(), bullet.get()->GetWorldTransform())) {
+			//自キャラの衝突時コールバックを呼び出す
+			player->OnCollisioin();
+			//敵弾の衝突時コールバックを呼び出す
+			bullet->OnCollisioin();
+		}
+
+	}
+
+#pragma endregion
+
+#pragma region 自弾と敵キャラの当たり判定
+
+#pragma endregion
+
+#pragma region 自弾と敵弾の当たり判定
+
+#pragma endregion
+}
+
+
+bool BallCollision(WorldTransform a, WorldTransform b) {
+	float x, y, z;
+	float r;
+
+	x = (float)pow(b.translation_.x - a.translation_.x, 2);
+	y = (float)pow(b.translation_.y - a.translation_.y, 2);
+	z = (float)pow(b.translation_.z - a.translation_.z, 2);
+
+	float pos = x + y + z;
+
+	r = (float)pow(a.scale_.x + b.scale_.x, 2);
+	if (pos <= r) {
+		return true;
+	}
+	return false;
 }

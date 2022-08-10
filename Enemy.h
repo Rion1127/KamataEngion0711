@@ -17,10 +17,15 @@ public:
 
 	void Shot();
 	Vector3 GetWorldPosition();
-
+	WorldTransform GetWorldTransform() { return worldTransform_; }
 	void SetPlayer(Player* player) { player_ = player; }
 	//•`‰æ
 	void Draw(const ViewProjection& viewProjection);
+
+	void OnCollisioin();
+
+	//’eƒŠƒXƒg‚ðŽæ“¾
+	const std::list<std::unique_ptr<EnemyBullet>>& GetBullets() { return bullets_; }
 
 private:
 	WorldTransform worldTransform_;
