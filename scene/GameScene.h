@@ -16,6 +16,7 @@
 
 #include "Player.h"
 #include "Enemy.h"
+#include "SkyDome.h"
 
 /// <summary>
 /// ゲームシーン
@@ -101,4 +102,9 @@ class GameScene {
 	/// <summary>
 	/// ゲームシーン用
 	/// </summary>
+	/// 
+	SkyDome* skyDome = nullptr;
+
+	Model* modelSkyDome = nullptr;
+
 };

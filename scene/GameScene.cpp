@@ -14,6 +14,7 @@ GameScene::~GameScene()
 	delete model_;
 	delete debugCamera_;
 	delete player_;
+	delete modelSkyDome;
 }
 
 void GameScene::Initialize() {
@@ -73,6 +74,10 @@ void GameScene::Initialize() {
 
 	//false バイオ :: true カメラ視点
 	isCamera = false;
+
+	skyDome = new SkyDome();
+	modelSkyDome = Model::CreateFromOBJ("skydome", true);
+	skyDome->Ini(modelSkyDome);
 }
 
 void GameScene::Update() 
@@ -122,6 +127,8 @@ void GameScene::Draw() {
 	/// </summary>
 	player_->Draw(/*viewProjection_*/debugCamera_->GetViewProjection());
 	enemy_->Draw(/*viewProjection_*/debugCamera_->GetViewProjection());
+
+	skyDome->Draw(debugCamera_->GetViewProjection());
 
 	// 3Dオブジェクト描画後処理
 	Model::PostDraw();
