@@ -17,6 +17,7 @@
 #include "Player.h"
 #include "Enemy.h"
 #include "SkyDome.h"
+#include "RailCamera.h"
 
 /// <summary>
 /// ゲームシーン
@@ -76,6 +77,9 @@ class GameScene {
 	bool isDebugCamera = false;
 	//カメラ上方向の角度
 	float viewAngle = 0.0f;
+	RailCamera* railCamera_ = nullptr;
+
+	ViewProjection useViewProjevtion;
 
 
 	//ライン描画X座標

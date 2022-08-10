@@ -14,7 +14,10 @@ GameScene::~GameScene()
 	delete model_;
 	delete debugCamera_;
 	delete player_;
+	delete EnemyModel;
+	delete enemy_;
 	delete modelSkyDome;
+	delete skyDome;
 }
 
 void GameScene::Initialize() {
@@ -78,6 +81,12 @@ void GameScene::Initialize() {
 	skyDome = new SkyDome();
 	modelSkyDome = Model::CreateFromOBJ("skydome", true);
 	skyDome->Ini(modelSkyDome);
+
+	railCamera_ = new RailCamera();
+	railCamera_->Ini(Vector3(0,0,-50),Vector3(0,0,0));
+
+	useViewProjevtion = railCamera_->GetViewProjection();
+	//useViewProjevtion = debugCamera_->GetViewProjection();
 }
 
 void GameScene::Update() 
@@ -88,6 +97,7 @@ void GameScene::Update()
 		else if (isCamera == true)isCamera = false;
 	}
 	
+	railCamera_->Update();
 	//自キャラ更新
 	player_->Update();
 	if (enemy_) {
@@ -95,6 +105,7 @@ void GameScene::Update()
 	}
 
 	CheckAllCollision(player_, enemy_);
+	
 
 
 }
@@ -125,10 +136,10 @@ void GameScene::Draw() {
 	/// <summary>
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
-	player_->Draw(/*viewProjection_*/debugCamera_->GetViewProjection());
-	enemy_->Draw(/*viewProjection_*/debugCamera_->GetViewProjection());
+	player_->Draw(useViewProjevtion);
+	enemy_->Draw(useViewProjevtion);
 
-	skyDome->Draw(debugCamera_->GetViewProjection());
+	skyDome->Draw(useViewProjevtion);
 
 	// 3Dオブジェクト描画後処理
 	Model::PostDraw();
