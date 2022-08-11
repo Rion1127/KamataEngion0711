@@ -18,6 +18,7 @@ GameScene::~GameScene()
 	delete enemy_;
 	delete modelSkyDome;
 	delete skyDome;
+	delete railCamera_;
 }
 
 void GameScene::Initialize() {
@@ -49,8 +50,8 @@ void GameScene::Initialize() {
 	AxisIndicator::GetInstance()->SetVisible(true);
 	//軸方向表示が参考するビュープロジェクションを指定する（アドレス渡し）
 	AxisIndicator::GetInstance()->SetTargetViewProjection(&viewProjection_);
-	//ライン描画が参照するビュープロジェクションを指定する（アドレス渡し）
-	PrimitiveDrawer::GetInstance()->SetViewProjection(&viewProjection_/*debugCamera_->GetViewProjection()*/);
+	////ライン描画が参照するビュープロジェクションを指定する（アドレス渡し）
+	//PrimitiveDrawer::GetInstance()->SetViewProjection(&viewProjection_/*debugCamera_->GetViewProjection()*/);
 #pragma region ライン描画座標
 	//ライン描画座標X
 	for (int i = 0; i < 30; i++) {
