@@ -85,6 +85,6 @@ void RailCamera::RailIni()
 void RailCamera::DrawRail()
 {
 	for (size_t i = 0; i < segmentCount + 1; i++) {
-		PrimitiveDrawer::GetInstance()->DrawLine3d()
+		//PrimitiveDrawer::GetInstance()->DrawLine3d()
 	}
 }

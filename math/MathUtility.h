@@ -1,5 +1,5 @@
 ﻿#pragma once
-
+#include <vector>
 #include "Vector3.h"
 #include "Matrix4.h"
 
@@ -65,3 +65,10 @@ Matrix4 operator*(const Matrix4& m1, const Matrix4& m2);
 Vector3 operator*(const Vector3& v, const Matrix4& m);
 
 } // namespace MathUtility
+
+
+const Vector3 lerp(const Vector3& start,const Vector3& end,const float t);
+const Vector3 ease_in(const Vector3& start, const Vector3& end, const float t);
+const Vector3 ease_out(const Vector3& start, const Vector3& end, const float t);
+const Vector3 ease_in_out(const Vector3& start, const Vector3& end, const float t);
+const Vector3 SplinePosition(const std::vector<Vector3>& point, size_t startIndex, const float t);

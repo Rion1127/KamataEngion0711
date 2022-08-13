@@ -36,9 +36,9 @@ void GameScene::Initialize() {
 	EnemyModel = Model::Create();
 
 	//カメラ視点座標を設定
-	viewProjection_.eye = { 0,0,-50 };
+	viewProjection_.eye = { 50,0,30 };
 	////カメラの注視点座標を設定
-	//viewProjection_.target = { 10,0,0 };
+	viewProjection_.target = { 0,0,30 };
 	////カメラ上方向ベクトルを設定（右上45度指定）
 	//viewProjection_.up = { cosf(XM_PI / 4.0f),sinf(XM_PI / 4.0f),0.0f };
 
@@ -86,8 +86,9 @@ void GameScene::Initialize() {
 	railCamera_ = new RailCamera();
 	railCamera_->Ini(Vector3(0,0,-50),Vector3(0,0,0));
 
-	useViewProjevtion = railCamera_->GetViewProjection();
+	//useViewProjevtion = railCamera_->GetViewProjection();
 	//useViewProjevtion = debugCamera_->GetViewProjection();
+	useViewProjevtion = viewProjection_;
 }
 
 void GameScene::Update() 

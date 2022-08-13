@@ -1,4 +1,4 @@
-
+#include "MathUtility.h"
 #include "Player.h"
 
 void Player::Initialize(Model* model, uint32_t textureHandle)
@@ -63,6 +63,14 @@ void Player::Draw(ViewProjection viewProjection_)
 	debugText_->SetPos(50, 170);
 	debugText_->Printf(
 		"player:(%f)", worldTransform_/*[PartID::Root]*/.rotation_.y);
+	//デバッグ表示
+	debugText_->SetPos(50, 410);
+	debugText_->Printf(
+		"timeRate:(%f)", timeRate);
+	//デバッグ表示
+	debugText_->SetPos(50, 430);
+	debugText_->Printf(
+		"nowtime:(%f)", nowtime);
 }
 
 void Player::OnCollisioin()
@@ -76,23 +84,55 @@ void Player::Move()
 	//キャラクターの移動速度
 	const float playerSpeed = 0.2f;
 
-	//押した方向で移動ベクトルを変更
-	if (input_->PushKey(DIK_A)) {
-		move = { -playerSpeed,0,0 };
-	}
-	else if (input_->PushKey(DIK_D)) {
-		move = { playerSpeed,0,0 };
-	}
 
-	if (input_->PushKey(DIK_W)) {
-		move = { 0,playerSpeed,0 };
-	}
-	else if (input_->PushKey(DIK_S)) {
-		move = { 0,-playerSpeed,0 };
-	}
+	Vector3 start(0, 0, 0);
+	Vector3 p1(0, 10, 0);
+	Vector3 p2(0, -10, 0);
+	Vector3 end(0, 0, 50);
+	float maxTime = 5.0f;
+
+	/*std::vector<Vector3> point{ start,start,p1,p2,end,end };
+	if (timeRate >= 1.0f) {
+		if (startIndex < point.size() - 3) {
+			startIndex++;
+			timeRate -= 1.0f;
+			nowtime = 0;
+		}
+		else {
+			timeRate = 1.0f;
+		}
+	}*/
+	
+	timeRate++;
+	//timeRate / FPS　で1秒のカウントをnowTimeに代入する 
+	nowtime = timeRate / 120;
+
+	nowtime = min(nowtime / maxTime, 1.0f);
+
+	Vector3 a = lerp(start, p1, nowtime);
+	Vector3 b = lerp(p1, end, nowtime);
+
+	position = ease_in_out(a, b, nowtime);
+
+
+
+#pragma region
+	////押した方向で移動ベクトルを変更
+	//if (input_->PushKey(DIK_A)) {
+	//	move = { -playerSpeed,0,0 };
+	//}
+	//else if (input_->PushKey(DIK_D)) {
+	//	move = { playerSpeed,0,0 };
+	//}
+	//if (input_->PushKey(DIK_W)) {
+	//	move = { 0,playerSpeed,0 };
+	//}
+	//else if (input_->PushKey(DIK_S)) {
+	//	move = { 0,-playerSpeed,0 };
+	//}
 
 	//注視点移動（ベクトルの加算）
-	worldTransform_.translation_ += move;
+	worldTransform_.translation_ = position;
 	
 	//移動限界座標
 	const float moveLimitX = 35;
@@ -102,6 +142,7 @@ void Player::Move()
 	worldTransform_.translation_.x = min(worldTransform_.translation_.x, +moveLimitX);
 	worldTransform_.translation_.y = max(worldTransform_.translation_.y, -moveLimitY);
 	worldTransform_.translation_.y = min(worldTransform_.translation_.y, +moveLimitY);
+#pragma endregion
 }
 
 void Player::Rotation()

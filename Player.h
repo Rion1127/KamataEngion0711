@@ -59,5 +59,12 @@ private:
 
 	//弾
 	std::list<std::unique_ptr<PlayerBullet>> bullets_;
+
+
+	Vector3 position;
+	float timeRate = 0;
+	float nowtime = 0;
+	//p1からスタートする
+	size_t startIndex = 1;
 };
 
