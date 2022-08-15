@@ -105,10 +105,9 @@ void Player::Move()
 	timeRate = time / 120;
 
 	timeRate = min(timeRate / maxTime, 1.0f);
-
+	//ÉxÉWÉGã»ê¸
 	/*Vector3 a = lerp(start, p1, nowtime);
 	Vector3 b = lerp(p1, end, nowtime);
-
 	position = ease_in_out(a, b, nowtime);*/
 	position = SplinePosition(points, startIndex, timeRate);
 

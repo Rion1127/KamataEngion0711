@@ -103,7 +103,7 @@ class GameScene {
 	Vector3 start = { 0, 0, 0 };
 	Vector3 p2 = { 20,10,10 };
 	Vector3 p3 = { -10,-10,20 };
-	Vector3 end = { 0,20,30 };
+	Vector3 end = { 0,15,30 };
 	std::vector<Vector3> points{ start,start,p2,p3,end,end };
 	size_t startIndex = 1;
 	//size_t potinsSize = points.size();
