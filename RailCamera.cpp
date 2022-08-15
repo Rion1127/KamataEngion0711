@@ -26,7 +26,7 @@ void RailCamera::Ini(Vector3 pos, Vector3 rot)
 		{30,0,0},
 	};
 	//ライン描画が参照するビュープロジェクションを指定する（アドレス渡し）
-	PrimitiveDrawer::GetInstance()->SetViewProjection(&viewProjection);
+	//PrimitiveDrawer::GetInstance()->SetViewProjection(&viewProjection);
 }
 
 void RailCamera::Update()
@@ -51,22 +51,22 @@ void RailCamera::Update()
 	viewProjection.UpdateMatrix();
 	viewProjection.TransferMatrix();
 
-	//デバッグ表示
-	debugText_->SetPos(50, 250);
-	debugText_->Printf(
-		"viewProjection.eye:(%f,%f,%f)", viewProjection.eye.x,
-		viewProjection.eye.y,
-		viewProjection.eye.z);
-	debugText_->SetPos(50, 270);
-	debugText_->Printf(
-		"viewProjection.up:(%f,%f,%f)", viewProjection.up.x,
-		viewProjection.up.y,
-		viewProjection.up.z);
-	debugText_->SetPos(50, 290);
-	debugText_->Printf(
-		"viewProjection.target:(%f,%f,%f)", viewProjection.target.x,
-		viewProjection.target.y,
-		viewProjection.target.z);
+	////デバッグ表示
+	//debugText_->SetPos(50, 250);
+	//debugText_->Printf(
+	//	"viewProjection.eye:(%f,%f,%f)", viewProjection.eye.x,
+	//	viewProjection.eye.y,
+	//	viewProjection.eye.z);
+	//debugText_->SetPos(50, 270);
+	//debugText_->Printf(
+	//	"viewProjection.up:(%f,%f,%f)", viewProjection.up.x,
+	//	viewProjection.up.y,
+	//	viewProjection.up.z);
+	//debugText_->SetPos(50, 290);
+	//debugText_->Printf(
+	//	"viewProjection.target:(%f,%f,%f)", viewProjection.target.x,
+	//	viewProjection.target.y,
+	//	viewProjection.target.z);
 }
 
 void RailCamera::RailIni()

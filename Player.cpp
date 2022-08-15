@@ -62,15 +62,15 @@ void Player::Draw(ViewProjection viewProjection_)
 	//デバッグ表示
 	debugText_->SetPos(50, 170);
 	debugText_->Printf(
-		"player:(%f)", worldTransform_/*[PartID::Root]*/.rotation_.y);
+		"startIndex:(%d)", startIndex);
 	//デバッグ表示
 	debugText_->SetPos(50, 410);
 	debugText_->Printf(
-		"timeRate:(%f)", timeRate);
+		"timeRate:(%f)", time / 120);
 	//デバッグ表示
 	debugText_->SetPos(50, 430);
 	debugText_->Printf(
-		"nowtime:(%f)", nowtime);
+		"timeRate:(%f)", timeRate);
 }
 
 void Player::OnCollisioin()
@@ -85,34 +85,32 @@ void Player::Move()
 	const float playerSpeed = 0.2f;
 
 
-	Vector3 start(0, 0, 0);
-	Vector3 p1(0, 10, 0);
-	Vector3 p2(0, -10, 0);
-	Vector3 end(0, 0, 50);
 	float maxTime = 5.0f;
 
-	/*std::vector<Vector3> point{ start,start,p1,p2,end,end };
 	if (timeRate >= 1.0f) {
-		if (startIndex < point.size() - 3) {
+		//次の制御点がある場合
+		if (startIndex < points.size() - 3) {
 			startIndex++;
-			timeRate -= 1.0f;
-			nowtime = 0;
+			time = 0.0f;
+			timeRate = 0;
 		}
+		//最終地点だった場合1.0fにして動きを止める
 		else {
 			timeRate = 1.0f;
 		}
-	}*/
+	}
 	
-	timeRate++;
+	time++;
 	//timeRate / FPS　で1秒のカウントをnowTimeに代入する 
-	nowtime = timeRate / 120;
+	timeRate = time / 120;
 
-	nowtime = min(nowtime / maxTime, 1.0f);
+	timeRate = min(timeRate / maxTime, 1.0f);
 
-	Vector3 a = lerp(start, p1, nowtime);
+	/*Vector3 a = lerp(start, p1, nowtime);
 	Vector3 b = lerp(p1, end, nowtime);
 
-	position = ease_in_out(a, b, nowtime);
+	position = ease_in_out(a, b, nowtime);*/
+	position = SplinePosition(points, startIndex, timeRate);
 
 
 

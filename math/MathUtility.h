@@ -72,3 +72,5 @@ const Vector3 ease_in(const Vector3& start, const Vector3& end, const float t);
 const Vector3 ease_out(const Vector3& start, const Vector3& end, const float t);
 const Vector3 ease_in_out(const Vector3& start, const Vector3& end, const float t);
 const Vector3 SplinePosition(const std::vector<Vector3>& point, size_t startIndex, const float t);
+// 始点/終点の座標と ベクトルから、曲線の軌道上の座標を返す
+Vector3 GetPoint(Vector3 p0, Vector3 p1, Vector3 v0, Vector3 v1, float t);

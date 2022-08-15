@@ -2,6 +2,7 @@
 #include "TextureManager.h"
 #include "AxisIndicator.h"
 #include "PrimitiveDrawer.h"
+#include "MathUtility.h"
 #include <cassert>
 #define XM_PI 3.141592
 
@@ -46,12 +47,17 @@ void GameScene::Initialize() {
 	viewProjection_.Initialize();
 	//デバッグカメラの生成
 	debugCamera_ = new DebugCamera(WinApp::kWindowWidth, WinApp::kWindowHeight);
+
+	//useViewProjevtion = railCamera_->GetViewProjection();
+	useViewProjevtion = debugCamera_->GetViewProjection();
+	//useViewProjevtion = viewProjection_;
+
 	//軸方向表示の表示を有効にする
 	AxisIndicator::GetInstance()->SetVisible(true);
 	//軸方向表示が参考するビュープロジェクションを指定する（アドレス渡し）
-	AxisIndicator::GetInstance()->SetTargetViewProjection(&viewProjection_);
+	AxisIndicator::GetInstance()->SetTargetViewProjection(&useViewProjevtion);
 	////ライン描画が参照するビュープロジェクションを指定する（アドレス渡し）
-	//PrimitiveDrawer::GetInstance()->SetViewProjection(&viewProjection_/*debugCamera_->GetViewProjection()*/);
+	PrimitiveDrawer::GetInstance()->SetViewProjection(&useViewProjevtion);
 #pragma region ライン描画座標
 	//ライン描画座標X
 	for (int i = 0; i < 30; i++) {
@@ -66,6 +72,10 @@ void GameScene::Initialize() {
 	}
 	colorZ = { 0,0,255,1 };
 #pragma endregion
+	startPos = { 10,0,0 };
+	endPos = { 25,10,0 };
+	v0 = { 0,-20,0 };
+	v1 = { 0,-10,0 };
 
 	//自キャラ生成
 	player_ = new Player();
@@ -84,21 +94,43 @@ void GameScene::Initialize() {
 	skyDome->Ini(modelSkyDome);
 
 	railCamera_ = new RailCamera();
-	railCamera_->Ini(Vector3(0,0,-50),Vector3(0,0,0));
+	railCamera_->Ini(Vector3(0, 0, -50), Vector3(0, 0, 0));
 
-	//useViewProjevtion = railCamera_->GetViewProjection();
-	//useViewProjevtion = debugCamera_->GetViewProjection();
-	useViewProjevtion = viewProjection_;
+
+	/*for (int i = 0; i < 100; i++) {
+		Vector3 pos = GetPoint(startPos, endPos, v0, v1, t);
+		worldTransforms_[i].Initialize();
+		worldTransforms_[i].translation_ = pos;
+		worldTransforms_[i].TransferMatrix();
+		matrix.UpdateMatrix(worldTransforms_[i]);
+		t += 0.01f;
+	}*/
+
+
+	for (int i = 0; i < points.size() - 3; i++) {
+		for (int j = 0; j < 100; j++) {
+			Vector3 pos = SplinePosition(points, startIndex, t);
+			positions[i][j] = pos;
+			t += 0.01f;
+		}
+		//次の制御点に移動する
+		startIndex+=1;
+		//リセット
+		t = 0;
+	}
+
+
+
 }
 
-void GameScene::Update() 
+void GameScene::Update()
 {
 	debugCamera_->Update();
 	if (input_->TriggerKey(DIK_Q)) {
 		if (isCamera == false)isCamera = true;
 		else if (isCamera == true)isCamera = false;
 	}
-	
+
 	railCamera_->Update();
 	//自キャラ更新
 	player_->Update();
@@ -107,9 +139,17 @@ void GameScene::Update()
 	}
 
 	CheckAllCollision(player_, enemy_);
-	
 
 
+	//デバッグ表示
+	for (int i = 0; i < 5; i++) {
+		debugText_->SetPos(50, 250 + i * 20);
+		debugText_->Printf(
+			"worldTransforms_:(%f,%f,%f)",
+			worldTransforms_[i].translation_.x,
+			worldTransforms_[i].translation_.y,
+			worldTransforms_[i].translation_.z);
+	}
 }
 
 void GameScene::Draw() {
@@ -142,6 +182,17 @@ void GameScene::Draw() {
 	enemy_->Draw(useViewProjevtion);
 
 	skyDome->Draw(useViewProjevtion);
+
+	for (int i = 0; i < 3; i++) {
+		for (int j = 0; j < 99; j++) {
+			//model_->Draw(worldTransforms_[i], useViewProjevtion);
+			PrimitiveDrawer::GetInstance()->DrawLine3d(
+				positions[i][j],
+				positions[i][j + 1],
+				colorX);
+		}
+	}
+
 
 	// 3Dオブジェクト描画後処理
 	Model::PostDraw();
