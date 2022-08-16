@@ -48,8 +48,11 @@ void GameScene::Initialize() {
 	//デバッグカメラの生成
 	debugCamera_ = new DebugCamera(WinApp::kWindowWidth, WinApp::kWindowHeight);
 
-	//useViewProjevtion = railCamera_->GetViewProjection();
-	useViewProjevtion = debugCamera_->GetViewProjection();
+	railCamera_ = new RailCamera();
+	railCamera_->Ini(Vector3(0, 0, -50), Vector3(0, 0, 0));
+
+	useViewProjevtion = railCamera_->GetViewProjection();
+	//useViewProjevtion = debugCamera_->GetViewProjection();
 	//useViewProjevtion = viewProjection_;
 
 	//軸方向表示の表示を有効にする
@@ -81,6 +84,7 @@ void GameScene::Initialize() {
 	player_ = new Player();
 	//自キャラの初期化
 	player_->Initialize(model_, textureHandle_);
+	player_->SetParent(railCamera_->GetWorldTransform());
 
 	enemy_ = new Enemy();
 	enemy_->Initialize(EnemyModel, enemyTextureHandle_);
@@ -93,8 +97,7 @@ void GameScene::Initialize() {
 	modelSkyDome = Model::CreateFromOBJ("skydome", true);
 	skyDome->Ini(modelSkyDome);
 
-	railCamera_ = new RailCamera();
-	railCamera_->Ini(Vector3(0, 0, -50), Vector3(0, 0, 0));
+	
 
 
 	/*for (int i = 0; i < 100; i++) {
@@ -179,6 +182,7 @@ void GameScene::Draw() {
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
 	player_->Draw(useViewProjevtion);
+	enemy_->Draw(useViewProjevtion);
 	enemy_->Draw(useViewProjevtion);
 
 	skyDome->Draw(useViewProjevtion);

@@ -10,6 +10,9 @@ void SkyDome::Ini(Model* model)
 {
 	worldTransform.Initialize();
 	worldTransform.translation_ = { 0,0,0 };
+	worldTransform.scale_ = { 5,5,5 };
+	worldTransform.rotation_ = { 0,0,0 };
+	matrix.UpdateMatrix(worldTransform);
 	model_ = model;
 	
 }

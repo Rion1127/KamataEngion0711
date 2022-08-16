@@ -12,9 +12,12 @@ public:
 	void Ini(Vector3 pos,Vector3 rot);
 	void Update();
 
+	void Move();
+
 	void RailIni();
 	void DrawRail();
 
+	WorldTransform& GetWorldTransform() { return worldTransform; }
 	ViewProjection GetViewProjection() { return viewProjection; }
 
 private:
@@ -31,5 +34,16 @@ private:
 	//線分の数
 	const size_t segmentCount = 100;
 
+	Vector3 position;
+	float time = 0;
+	float timeRate = 0;
+
+	Vector3 start = { 0, 0, -50 };
+	Vector3 p2 = { 20,10,-40 };
+	Vector3 p3 = { -10,-10,-30 };
+	Vector3 end = { 0,15,-20 };
+	std::vector<Vector3> points{ start,start,p2,p3,end,end };
+	//p1からスタートする
+	size_t startIndex = 1;
 };
 

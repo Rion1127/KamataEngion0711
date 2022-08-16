@@ -31,6 +31,8 @@ void RailCamera::Ini(Vector3 pos, Vector3 rot)
 
 void RailCamera::Update()
 {
+	Move();
+
 	float speed = -0.05f;
 	worldTransform.scale_ = { 1,1,1 };
 	worldTransform.translation_ += { 0,0,-speed };
@@ -67,6 +69,37 @@ void RailCamera::Update()
 	//	"viewProjection.target:(%f,%f,%f)", viewProjection.target.x,
 	//	viewProjection.target.y,
 	//	viewProjection.target.z);
+}
+
+void RailCamera::Move()
+{
+	float maxTime = 5.0f;
+
+	if (timeRate >= 1.0f) {
+		//次の制御点がある場合
+		if (startIndex < points.size() - 3) {
+			startIndex++;
+			time = 0.0f;
+			timeRate = 0;
+		}
+		//最終地点だった場合1.0fにして動きを止める
+		else {
+			timeRate = 1.0f;
+		}
+	}
+	
+	time++;
+	//timeRate / FPS　で1秒のカウントをnowTimeに代入する 
+	timeRate = time / 120;
+
+	timeRate = min(timeRate / maxTime, 1.0f);
+	//ベジエ曲線
+	/*Vector3 a = lerp(start, p1, nowtime);
+	Vector3 b = lerp(p1, end, nowtime);
+	position = ease_in_out(a, b, nowtime);*/
+	position = SplinePosition(points, startIndex, timeRate);
+	//注視点移動（ベクトルの加算）
+	worldTransform.translation_ = position;
 }
 
 void RailCamera::RailIni()

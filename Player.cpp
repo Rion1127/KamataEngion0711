@@ -17,7 +17,7 @@ void Player::Initialize(Model* model, uint32_t textureHandle)
 
 	matrix.ScaleChange(worldTransform_, 1, 1, 1, 1);
 	matrix.RotaChange(worldTransform_, 0, 0, 0);
-	matrix.ChangeTranslation(worldTransform_, 0, 0, 0);
+	matrix.ChangeTranslation(worldTransform_, 0, 0, 50);
 	matrix.UpdateMatrix(worldTransform_);
 }
 
@@ -37,9 +37,10 @@ void Player::Update()
 
 Vector3 Player::GetWorldPosition()
 {
-	Vector3 worldPos;
-	//ワールド行列の平行移動成分を取得
-	worldPos = worldTransform_.translation_;
+	Vector3 worldPos =
+	{ worldTransform_.matWorld_.m[3][0],
+		worldTransform_.matWorld_.m[3][1],
+		worldTransform_.matWorld_.m[3][2] };
 	return worldPos;
 }
 
@@ -77,6 +78,11 @@ void Player::OnCollisioin()
 {
 }
 
+void Player::SetParent(WorldTransform& worldTransform)
+{
+	worldTransform_.parent_ = &worldTransform;
+}
+
 void Player::Move()
 {
 	//キャラクターの移動ベクトル
@@ -87,49 +93,51 @@ void Player::Move()
 
 	float maxTime = 5.0f;
 
-	if (timeRate >= 1.0f) {
-		//次の制御点がある場合
-		if (startIndex < points.size() - 3) {
-			startIndex++;
-			time = 0.0f;
-			timeRate = 0;
-		}
-		//最終地点だった場合1.0fにして動きを止める
-		else {
-			timeRate = 1.0f;
-		}
-	}
-	
-	time++;
-	//timeRate / FPS　で1秒のカウントをnowTimeに代入する 
-	timeRate = time / 120;
+	//if (timeRate >= 1.0f) {
+	//	//次の制御点がある場合
+	//	if (startIndex < points.size() - 3) {
+	//		startIndex++;
+	//		time = 0.0f;
+	//		timeRate = 0;
+	//	}
+	//	//最終地点だった場合1.0fにして動きを止める
+	//	else {
+	//		timeRate = 1.0f;
+	//	}
+	//}
+	//
+	//time++;
+	////timeRate / FPS　で1秒のカウントをnowTimeに代入する 
+	//timeRate = time / 120;
 
-	timeRate = min(timeRate / maxTime, 1.0f);
-	//ベジエ曲線
-	/*Vector3 a = lerp(start, p1, nowtime);
-	Vector3 b = lerp(p1, end, nowtime);
-	position = ease_in_out(a, b, nowtime);*/
-	position = SplinePosition(points, startIndex, timeRate);
+	//timeRate = min(timeRate / maxTime, 1.0f);
+	////ベジエ曲線
+	///*Vector3 a = lerp(start, p1, nowtime);
+	//Vector3 b = lerp(p1, end, nowtime);
+	//position = ease_in_out(a, b, nowtime);*/
+	//position = SplinePosition(points, startIndex, timeRate);
 
 
 
 #pragma region
-	////押した方向で移動ベクトルを変更
-	//if (input_->PushKey(DIK_A)) {
-	//	move = { -playerSpeed,0,0 };
-	//}
-	//else if (input_->PushKey(DIK_D)) {
-	//	move = { playerSpeed,0,0 };
-	//}
-	//if (input_->PushKey(DIK_W)) {
-	//	move = { 0,playerSpeed,0 };
-	//}
-	//else if (input_->PushKey(DIK_S)) {
-	//	move = { 0,-playerSpeed,0 };
-	//}
+	//押した方向で移動ベクトルを変更
+	if (input_->PushKey(DIK_A)) {
+		move = { -playerSpeed,0,0 };
+	}
+	else if (input_->PushKey(DIK_D)) {
+		move = { playerSpeed,0,0 };
+	}
+	if (input_->PushKey(DIK_W)) {
+		move = { 0,playerSpeed,0 };
+	}
+	else if (input_->PushKey(DIK_S)) {
+		move = { 0,-playerSpeed,0 };
+	}
 
 	//注視点移動（ベクトルの加算）
-	worldTransform_.translation_ = position;
+	//worldTransform_.translation_ = position;
+
+	worldTransform_.translation_ += move;
 	
 	//移動限界座標
 	const float moveLimitX = 35;
@@ -157,6 +165,11 @@ void Player::Rotation()
 void Player::Attack()
 {
 	if (input_->TriggerKey(DIK_SPACE)) {
+		Vector3 pos =
+		{ worldTransform_.matWorld_.m[3][0],
+			worldTransform_.matWorld_.m[3][1],
+			worldTransform_.matWorld_.m[3][2] };
+
 		// 弾の速度
 		const float kBulletSpeed = 1.0f;
 		Vector3 velocity(0, 0, kBulletSpeed);
@@ -166,7 +179,7 @@ void Player::Attack()
 		velocity.normalize();
 		// 弾生成、初期化
 		std::unique_ptr<PlayerBullet> newBullet = std::make_unique<PlayerBullet>();
-		newBullet->Initialize(model_, worldTransform_.translation_, velocity);
+		newBullet->Initialize(model_, pos, velocity);
 
 		// 弾を登録
 		bullets_.push_back(std::move(newBullet));

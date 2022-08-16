@@ -24,6 +24,8 @@ public:
 
 	void OnCollisioin();
 
+	void SetParent(WorldTransform& worldTransform);
+
 	//’eƒŠƒXƒg‚ğæ“¾
 	const std::list<std::unique_ptr<PlayerBullet>>& GetBullets() { return bullets_; }
 
