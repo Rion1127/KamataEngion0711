@@ -14,5 +14,7 @@ private:
 	WorldTransform worldTransform;
 	Matrix matrix;
 	Model* model_ = nullptr;
+
+	Vector3 rot;
 };
 

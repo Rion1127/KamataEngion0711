@@ -11,7 +11,7 @@ class PlayerBullet
 public:
 	~PlayerBullet();
 	//‰Šú‰»
-	void Initialize(Model* model, const Vector3& position,const Vector3& velocity);
+	void Initialize(Model* model, const Vector3& position, const Vector3 rot, const Vector3& velocity);
 	//XV
 	void Update();
 	//•`‰æ

@@ -1,3 +1,4 @@
+#include "MathUtility.h"
 #include "RailCamera.h"
 
 RailCamera::~RailCamera()
@@ -10,6 +11,7 @@ void RailCamera::Ini(Vector3 pos, Vector3 rot)
 	//ワールドトランスフォームの初期設定
 	worldTransform.translation_ = pos;
 	worldTransform.rotation_ = rot;
+	
 	worldTransform.Initialize();
 	matrix.UnitMatrix(worldTransform.matWorld_);
 	//ビュープロジェクションの初期化
@@ -19,14 +21,27 @@ void RailCamera::Ini(Vector3 pos, Vector3 rot)
 
 	controlPoints_ = {
 		{0,0,0},
-		{10,10,0},
-		{10,15,0},
-		{20,15,0},
-		{20,0,0},
-		{30,0,0},
+		{10,10,10},
+		{10,15,20},
+		{20,15,30},
+		{20,0,40},
+		{30,0,50},
 	};
 	//ライン描画が参照するビュープロジェクションを指定する（アドレス渡し）
 	//PrimitiveDrawer::GetInstance()->SetViewProjection(&viewProjection);
+	
+	for (int i = 0; i < railPoints.size() - 3; i++) {
+		for (int j = 0; j < 100; j++) {
+			Vector3 pos = SplinePosition(railPoints, startIndex, t);
+			positions[i][j] = pos + Vector3(1,-1,5);
+			t += 0.01f;
+		}
+		//次の制御点に移動する
+		startIndex += 1;
+		//リセット
+		t = 0;
+	}
+	startIndex = 1;
 }
 
 void RailCamera::Update()
@@ -36,12 +51,12 @@ void RailCamera::Update()
 	float speed = -0.05f;
 	worldTransform.scale_ = { 1,1,1 };
 	worldTransform.translation_ += { 0,0,-speed };
-	worldTransform.rotation_ = { 0,0,0 };
+	
 	matrix.UpdateMatrix(worldTransform);
 
 	viewProjection.eye = worldTransform.translation_;
 	//ワールド前方ベクトル
-	Vector3 forward(0, 0, 1);
+	Vector3 forward(0, -0.2f, 1);
 	//レールカメラの回転を反映
 	forward = transform(forward, worldTransform.matWorld_);
 	//視点から前方に適当な距離進んだ位置が注視点
@@ -53,22 +68,22 @@ void RailCamera::Update()
 	viewProjection.UpdateMatrix();
 	viewProjection.TransferMatrix();
 
-	////デバッグ表示
-	//debugText_->SetPos(50, 250);
-	//debugText_->Printf(
-	//	"viewProjection.eye:(%f,%f,%f)", viewProjection.eye.x,
-	//	viewProjection.eye.y,
-	//	viewProjection.eye.z);
+	//デバッグ表示
+	debugText_->SetPos(50, 270);
+	debugText_->Printf(
+		"RailCamera.eye:(%f,%f,%f)", viewProjection.eye.x,
+		viewProjection.eye.y,
+		viewProjection.eye.z);
 	//debugText_->SetPos(50, 270);
 	//debugText_->Printf(
 	//	"viewProjection.up:(%f,%f,%f)", viewProjection.up.x,
 	//	viewProjection.up.y,
 	//	viewProjection.up.z);
-	//debugText_->SetPos(50, 290);
-	//debugText_->Printf(
-	//	"viewProjection.target:(%f,%f,%f)", viewProjection.target.x,
-	//	viewProjection.target.y,
-	//	viewProjection.target.z);
+	debugText_->SetPos(50, 310);
+	debugText_->Printf(
+		"viewProjection.target:(%f,%f,%f)", viewProjection.target.x,
+		viewProjection.target.y,
+		viewProjection.target.z);
 }
 
 void RailCamera::Move()
@@ -88,7 +103,7 @@ void RailCamera::Move()
 		}
 	}
 	
-	time++;
+	time += 0.3f;
 	//timeRate / FPS　で1秒のカウントをnowTimeに代入する 
 	timeRate = time / 120;
 
@@ -117,7 +132,13 @@ void RailCamera::RailIni()
 
 void RailCamera::DrawRail()
 {
-	for (size_t i = 0; i < segmentCount + 1; i++) {
-		//PrimitiveDrawer::GetInstance()->DrawLine3d()
+	for (int i = 0; i < points.size() - 3; i++) {
+		for (int j = 0; j < 99; j++) {
+			PrimitiveDrawer::GetInstance()->DrawLine3d(
+				positions[i][j] ,
+				positions[i][j + 1] ,
+				Vector4(1,1,1,1));
+		}
 	}
+	
 }

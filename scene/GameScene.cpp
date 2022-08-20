@@ -59,7 +59,7 @@ void GameScene::Initialize() {
 	//軸方向表示の表示を有効にする
 	AxisIndicator::GetInstance()->SetVisible(true);
 	//軸方向表示が参考するビュープロジェクションを指定する（アドレス渡し）
-	AxisIndicator::GetInstance()->SetTargetViewProjection(&useViewProjevtion);
+	AxisIndicator::GetInstance()->SetTargetViewProjection(&debugCamera_->GetViewProjection());
 	////ライン描画が参照するビュープロジェクションを指定する（アドレス渡し）
 	PrimitiveDrawer::GetInstance()->SetViewProjection(&useViewProjevtion);
 #pragma region ライン描画座標
@@ -131,6 +131,8 @@ void GameScene::Initialize() {
 
 void GameScene::Update()
 {
+	skyDome->Update();
+
 	debugCamera_->Update();
 	if (input_->TriggerKey(DIK_Q)) {
 		if (isCamera == false)isCamera = true;
@@ -148,14 +150,20 @@ void GameScene::Update()
 
 
 	//デバッグ表示
-	for (int i = 0; i < 5; i++) {
+	/*for (int i = 0; i < 5; i++) {
 		debugText_->SetPos(50, 250 + i * 20);
 		debugText_->Printf(
 			"worldTransforms_:(%f,%f,%f)",
 			worldTransforms_[i].translation_.x,
 			worldTransforms_[i].translation_.y,
 			worldTransforms_[i].translation_.z);
-	}
+	}*/
+	debugText_->SetPos(50, 290);
+	debugText_->Printf(
+		"worldTransforms_:(%f,%f,%f)",
+		debugCamera_->GetViewProjection().eye.x,
+		debugCamera_->GetViewProjection().eye.y,
+		debugCamera_->GetViewProjection().eye.z);
 }
 
 void GameScene::Draw() {
@@ -186,19 +194,21 @@ void GameScene::Draw() {
 	/// </summary>
 	player_->Draw(useViewProjevtion);
 	enemy_->Draw(useViewProjevtion);
-	enemy_->Draw(useViewProjevtion);
+	
 
-	skyDome->Draw(useViewProjevtion);
+	skyDome->Draw(viewProjection_);
+	//レールカメラの通る線を引く
+	railCamera_->DrawRail();
 
-	for (int i = 0; i < 3; i++) {
-		for (int j = 0; j < 99; j++) {
-			//model_->Draw(worldTransforms_[i], useViewProjevtion);
-			PrimitiveDrawer::GetInstance()->DrawLine3d(
-				positions[i][j],
-				positions[i][j + 1],
-				colorX);
-		}
-	}
+	//for (int i = 0; i < 3; i++) {
+	//	for (int j = 0; j < 99; j++) {
+	//		//model_->Draw(worldTransforms_[i], useViewProjevtion);
+	//		PrimitiveDrawer::GetInstance()->DrawLine3d(
+	//			positions[i][j],
+	//			positions[i][j + 1],
+	//			colorX);
+	//	}
+	//}
 
 
 	// 3Dオブジェクト描画後処理

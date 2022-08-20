@@ -70,9 +70,9 @@ void Player::Draw(ViewProjection viewProjection_)
 	//デバッグ表示
 	debugText_->SetPos(50, 150);
 	debugText_->Printf(
-		"player:(%f,%f,%f)", worldTransform_/*[PartID::Root]*/.translation_.x,
-		worldTransform_/*[PartID::Root]*/.translation_.y,
-		worldTransform_/*[PartID::Root]*/.translation_.z);
+		"player:(%f,%f,%f)", GetWorldPosition().x,
+		GetWorldPosition().y,
+		GetWorldPosition().z);
 	//デバッグ表示
 	debugText_->SetPos(50, 170);
 	debugText_->Printf(
@@ -173,13 +173,13 @@ void Player::Move()
 	worldTransform_.translation_ += speed;
 	
 	//移動限界座標
-	const float moveLimitX = 18;
+	const float moveLimitX = 15;
 	const float moveLimitY = 9;
 	//範囲を超えない処理
 	worldTransform_.translation_.x = max(worldTransform_.translation_.x, -moveLimitX);
 	worldTransform_.translation_.x = min(worldTransform_.translation_.x, +moveLimitX);
-	worldTransform_.translation_.y = max(worldTransform_.translation_.y, -moveLimitY);
-	worldTransform_.translation_.y = min(worldTransform_.translation_.y, +moveLimitY);
+	worldTransform_.translation_.y = max(worldTransform_.translation_.y, -moveLimitY-3);
+	worldTransform_.translation_.y = min(worldTransform_.translation_.y, +moveLimitY - 5);
 #pragma endregion
 
 #pragma region 回転
@@ -298,12 +298,12 @@ void Player::Attack()
 			velocity.normalize();
 			// 弾生成、初期化
 			std::unique_ptr<PlayerBullet> newBullet = std::make_unique<PlayerBullet>();
-			newBullet->Initialize(bulletModel, pos, velocity);
+			newBullet->Initialize(bulletModel, pos,worldTransform_.rotation_, velocity);
 
 			// 弾を登録
 			bullets_.push_back(std::move(newBullet));
 
-			cooltime = 5;
+			cooltime = 10;
 		}
 	}
 

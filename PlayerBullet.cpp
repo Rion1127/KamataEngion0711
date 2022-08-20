@@ -5,7 +5,7 @@ PlayerBullet::~PlayerBullet()
 
 }
 
-void PlayerBullet::Initialize(Model* model, const Vector3& position, const Vector3& velocity)
+void PlayerBullet::Initialize(Model* model, const Vector3& position,const Vector3 rot, const Vector3& velocity)
 {
 	assert(model);
 
@@ -15,8 +15,8 @@ void PlayerBullet::Initialize(Model* model, const Vector3& position, const Vecto
 
 	worldTransform_.Initialize();
 
-	matrix.ScaleChange(worldTransform_, 0.1f, 0.1f, 1, 1);
-	matrix.RotaChange(worldTransform_, 0, 0, 0);
+	matrix.ScaleChange(worldTransform_, 0.2f, 0.1f, 3, 1);
+	matrix.RotaChange(worldTransform_, rot.x, rot.y, rot.z);
 	worldTransform_.translation_ = position;
 	matrix.UpdateMatrix(worldTransform_);
 

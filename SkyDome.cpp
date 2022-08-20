@@ -14,11 +14,17 @@ void SkyDome::Ini(Model* model)
 	worldTransform.rotation_ = { 0,0,0 };
 	matrix.UpdateMatrix(worldTransform);
 	model_ = model;
+
+	rot = { 0,0,0 };
 	
 }
 
 void SkyDome::Update()
 {
+	Vector3 rotSpeed = { 0.00016f,0.00016f,0.000008f };
+
+	worldTransform.AddRotation(rotSpeed);
+	matrix.UpdateMatrix(worldTransform);
 }
 
 void SkyDome::Draw(ViewProjection viewProjection)
