@@ -23,6 +23,7 @@ public:
 	//描画
 	void Draw(ViewProjection viewProjection_);
 
+	void CollisionCooltime();
 	void OnCollisioin();
 
 	void SetParent(WorldTransform& worldTransform);
@@ -80,5 +81,8 @@ private:
 	std::vector<Vector3> points{ start,start,p2,p3,end,end };
 	//p1からスタートする
 	size_t startIndex = 1;
+
+	const int maxCollisionCoolTime = 20;
+	int collisionCoolTime;
 };
 

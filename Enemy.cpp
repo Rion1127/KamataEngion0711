@@ -36,6 +36,9 @@ void Enemy::Initialize(Model* model, uint32_t textureHandle)
 	//Shot();
 
 	phese_ApproachIni();
+
+	collisionCoolTime = maxCollisionCoolTime;
+	num = 0;
 }
 
 void Enemy::Update()
@@ -49,6 +52,10 @@ void Enemy::Update()
 	}
 
 	matrix.UpdateMatrix(worldTransform_);
+
+	if (hp <= 0) {
+		isAlive = false;
+	}
 }
 
 void Enemy::Shot()
@@ -108,16 +115,30 @@ void Enemy::Draw(const ViewProjection& viewProjection)
 		worldTransform_.translation_.y,
 		worldTransform_.translation_.z);
 
-	//debugText_->SetPos(50, 210);
-	//debugText_->Printf(
-	//	"Phase:%d",
-	//	phase_);
+	debugText_->SetPos(50, 210);
+	debugText_->Printf(
+		"hp:%d",
+		hp);
+}
+
+void Enemy::CollisionCooltime()
+{
+	collisionCoolTime--;
 }
 
 void Enemy::OnCollisioin()
 {
+	//hpが0より上の時
+	if (hp > 0) {
+		if (collisionCoolTime <= 0) {
+			num++;
+			hp--;
+			collisionCoolTime = maxCollisionCoolTime;
+		}
+	}
 }
 
+#pragma region フェーズ
 void Enemy::phase_Approach()
 {
 	speed = { 0,0,-0.001f };
@@ -159,3 +180,4 @@ void (Enemy::* Enemy::spFuncTable[])() = {
 	&Enemy::phase_Approach,
 	&Enemy::phase_Leave
 };
+#pragma endregion

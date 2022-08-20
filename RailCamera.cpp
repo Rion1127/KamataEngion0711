@@ -46,7 +46,7 @@ void RailCamera::Ini(Vector3 pos, Vector3 rot)
 
 void RailCamera::Update()
 {
-	Move();
+	//Move();
 
 	float speed = -0.05f;
 	worldTransform.scale_ = { 1,1,1 };

@@ -22,6 +22,7 @@ public:
 	//描画
 	void Draw(const ViewProjection& viewProjection);
 
+	void CollisionCooltime();
 	void OnCollisioin();
 
 	//弾リストを取得
@@ -37,6 +38,10 @@ private:
 	Input* input_ = nullptr;
 
 	DebugText* debugText_ = nullptr;
+
+	bool isAlive;
+	const int maxHp = 5;
+	int hp = maxHp;
 
 	//行動フェーズ
 	enum class Phase {
@@ -64,4 +69,7 @@ private:
 
 	Player* player_ = nullptr;
 
+	const int maxCollisionCoolTime = 20;
+	int collisionCoolTime;
+	int num;
 };

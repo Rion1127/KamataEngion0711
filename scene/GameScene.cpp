@@ -7,7 +7,8 @@
 #define XM_PI 3.141592
 
 bool BallCollision(WorldTransform a, WorldTransform b);
-bool BallCollision(Vector3 a, float aSize, WorldTransform b);
+bool BallCollision(Vector3 a, float aSize, Vector3 b, float bSize);
+bool RayCollision(WorldTransform ray, WorldTransform obj);
 
 GameScene::GameScene() {}
 
@@ -52,8 +53,8 @@ void GameScene::Initialize() {
 	railCamera_ = new RailCamera();
 	railCamera_->Ini(Vector3(0, 0, -50), Vector3(0, 0, 0));
 
-	useViewProjevtion = railCamera_->GetViewProjection();
-	//useViewProjevtion = debugCamera_->GetViewProjection();
+	//useViewProjevtion = railCamera_->GetViewProjection();
+	useViewProjevtion = debugCamera_->GetViewProjection();
 	//useViewProjevtion = viewProjection_;
 
 	//軸方向表示の表示を有効にする
@@ -86,7 +87,7 @@ void GameScene::Initialize() {
 	//自キャラの初期化
 	gumiship = Model::CreateFromOBJ("gumiship", true);
 	player_->Initialize(gumiship, textureHandle_);
-	player_->SetParent(railCamera_->GetWorldTransform());
+	//player_->SetParent(railCamera_->GetWorldTransform());
 
 	enemy_ = new Enemy();
 	enemy_->Initialize(EnemyModel, enemyTextureHandle_);
@@ -158,12 +159,12 @@ void GameScene::Update()
 			worldTransforms_[i].translation_.y,
 			worldTransforms_[i].translation_.z);
 	}*/
-	debugText_->SetPos(50, 290);
+	/*debugText_->SetPos(50, 290);
 	debugText_->Printf(
-		"worldTransforms_:(%f,%f,%f)",
+		"Collision:(%d)",
 		debugCamera_->GetViewProjection().eye.x,
 		debugCamera_->GetViewProjection().eye.y,
-		debugCamera_->GetViewProjection().eye.z);
+		debugCamera_->GetViewProjection().eye.z);*/
 }
 
 void GameScene::Draw() {
@@ -248,9 +249,9 @@ void GameScene::CheckAllCollision(Player* player, Enemy* enemy)
 	//自キャラと敵弾すべての当たり判定
 	for (const std::unique_ptr<EnemyBullet>& bullet : enemyBullets) {
 		//敵弾の座標
-		posB = enemy->GetWorldPosition();
+		posB = bullet.get()->GetWorldTransform().GetWorldPosition();
 
-		if (BallCollision(player->GetWorldPosition(),1.0f, bullet.get()->GetWorldTransform())) {
+		if (BallCollision(player->GetWorldPosition(),1.0f, posB,1.0f)) {
 			//自キャラの衝突時コールバックを呼び出す
 			player->OnCollisioin();
 			//敵弾の衝突時コールバックを呼び出す
@@ -262,12 +263,31 @@ void GameScene::CheckAllCollision(Player* player, Enemy* enemy)
 #pragma endregion
 
 #pragma region 自弾と敵キャラの当たり判定
+	enemy->CollisionCooltime();
+	debugText_->SetPos(50, 100);
+	//自キャラと敵弾すべての当たり判定
+	for (const std::unique_ptr<PlayerBullet>& bullet : playerBullets) {
+		//敵弾の座標
+		
+		if (RayCollision(bullet.get()->GetWorldTransform(), enemy->GetWorldTransform())) {
+			//敵キャラの衝突時コールバックを呼び出す
+			enemy->OnCollisioin();
+			//自弾の衝突時コールバックを呼び出す
+			bullet->OnCollisioin();
+		}
+	}
+		
+		
+
 
 #pragma endregion
 
 #pragma region 自弾と敵弾の当たり判定
 
 #pragma endregion
+
+
+	
 }
 
 
@@ -288,19 +308,88 @@ bool BallCollision(WorldTransform a, WorldTransform b) {
 	return false;
 }
 
-bool BallCollision(Vector3 a,float aSize, WorldTransform b) {
+bool BallCollision(Vector3 a,float aSize, Vector3 b,float bSize) {
 	float x, y, z;
 	float r;
 
-	x = (float)pow(b.translation_.x - a.x, 2);
-	y = (float)pow(b.translation_.y - a.y, 2);
-	z = (float)pow(b.translation_.z - a.z, 2);
+	x = (float)pow(b.x - a.x, 2);
+	y = (float)pow(b.y - a.y, 2);
+	z = (float)pow(b.z - a.z, 2);
 
 	float pos = x + y + z;
 
-	r = (float)pow(aSize + b.scale_.x, 2);
+	r = (float)pow(aSize + bSize, 2);
 	if (pos <= r) {
 		return true;
 	}
 	return false;
+}
+
+bool RayCollision(WorldTransform ray, WorldTransform obj)
+{
+	//レイの当たり判定
+
+	//ワールド座標を代入
+	Vector3 objPos;
+	Vector3 rayPos;
+	objPos = obj.GetWorldPosition();
+	rayPos = ray.GetWorldPosition();
+#pragma region レイの当たり判定
+	//レイの始点と終点を代入
+	Vector3 rayStart;
+	Vector3 rayEnd;
+	rayStart = {
+		ray.GetWorldPosition().x,
+		ray.GetWorldPosition().y,
+		ray.GetWorldPosition().z - ray.scale_.z - 1.0f,
+	};
+	rayEnd = {
+		ray.GetWorldPosition().x,
+		ray.GetWorldPosition().y,
+		ray.GetWorldPosition().z + ray.scale_.z + 1.0f,
+	};
+	//始点と終点からレイのベクトル(a→)を求める
+	Vector3 rayVec;
+	rayVec = rayEnd - rayStart;
+	float raySize;
+	raySize = rayVec.length();
+	//正規化(a→N)
+	rayVec.normalize();
+	//レイとオブジェクトのベクトル(b→)を求める
+	// レイの始点とオブジェクトへのベクトル(b→)を求める
+	Vector3 ABVec;
+	ABVec = {
+		objPos.x - rayStart.x,
+		objPos.y - rayStart.y,
+		objPos.z - rayStart.z
+	};
+
+	//b→・a→N をray2ObjLengthに格納
+	float ray2ObjectLength = ABVec.dot(rayVec);
+
+	//Qを求める a→N * b→・a→N + P
+	Vector3 Q;
+	//Q = rayVec * ABVec.dot(rayVec) + rayPos;
+	Q = rayVec * ray2ObjectLength + rayStart;
+	//オブジェクトからレイの垂線(obj-Q)を求める
+	Vector3 line;
+	line = objPos - Q;
+	//垂線の長さを求める
+	line.length();
+
+	//垂線の長さが半径+半径より短ければ当たってる
+	bool isHit = false;
+	if (line.length() <= obj.scale_.x + 0.2f) {
+		if (raySize >= ray2ObjectLength) {
+			isHit = true;
+		}
+	}
+
+	if (ray2ObjectLength <= 0) {
+		isHit = false;
+	}
+
+	return isHit;
+
+#pragma endregion
 }

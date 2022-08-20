@@ -52,5 +52,5 @@ struct WorldTransform {
 	void AddScale(Vector3 scale);
 	void AddRotation(Vector3 rot);
 	void AddPosition(Vector3 pos);
-
+	Vector3 GetWorldPosition();
 };

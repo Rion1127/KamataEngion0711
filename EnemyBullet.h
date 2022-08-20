@@ -37,4 +37,6 @@ private:
 
 	//‘¬“x
 	Vector3 velocity_;
+
+	int collisionCoolTime;
 };

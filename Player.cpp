@@ -31,6 +31,8 @@ void Player::Initialize(Model* model, uint32_t textureHandle)
 
 	bulletModel = Model::Create();
 	cooltime = 10;
+
+	collisionCoolTime = maxCollisionCoolTime;
 }
 
 void Player::Update()
@@ -87,8 +89,18 @@ void Player::Draw(ViewProjection viewProjection_)
 		"timeRate:(%f)", timeRate);
 }
 
+void Player::CollisionCooltime()
+{
+	collisionCoolTime--;
+}
+
 void Player::OnCollisioin()
 {
+	
+	if (collisionCoolTime <= 0) {
+
+		collisionCoolTime = maxCollisionCoolTime;
+	}
 }
 
 void Player::SetParent(WorldTransform& worldTransform)

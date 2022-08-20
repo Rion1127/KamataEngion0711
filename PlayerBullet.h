@@ -17,6 +17,8 @@ public:
 	//•`‰æ
 	void Draw(const ViewProjection& viewProjection);
 
+	WorldTransform GetWorldTransform() { return worldTransform_; }
+	Vector3 GetWorldPosition() { return worldTransform_.translation_; }
 	bool IsDead() const { return isDead_; }
 
 
