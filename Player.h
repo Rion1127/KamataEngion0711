@@ -12,6 +12,7 @@
 class Player
 {
 public:
+	~Player();
 	//初期化
 	void Initialize(Model* model,uint32_t textureHandle);
 	//更新
@@ -38,10 +39,12 @@ private:
 	Matrix matrix;
 	//モデル
 	Model* model_ = nullptr;
+	Model* bulletModel = nullptr;
 	//テクスチャハンドル
 	uint32_t textureHandle_ = 0u;
 	//入力
 	Input* input_ = nullptr;
+	Controller pad;
 	
 	DebugText* debugText_ = nullptr;
 
@@ -61,6 +64,7 @@ private:
 
 	//弾
 	std::list<std::unique_ptr<PlayerBullet>> bullets_;
+	int cooltime;
 
 
 	Vector3 position;

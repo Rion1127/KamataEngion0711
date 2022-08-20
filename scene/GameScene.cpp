@@ -7,6 +7,7 @@
 #define XM_PI 3.141592
 
 bool BallCollision(WorldTransform a, WorldTransform b);
+bool BallCollision(Vector3 a, float aSize, WorldTransform b);
 
 GameScene::GameScene() {}
 
@@ -83,7 +84,8 @@ void GameScene::Initialize() {
 	//自キャラ生成
 	player_ = new Player();
 	//自キャラの初期化
-	player_->Initialize(model_, textureHandle_);
+	gumiship = Model::CreateFromOBJ("gumiship", true);
+	player_->Initialize(gumiship, textureHandle_);
 	player_->SetParent(railCamera_->GetWorldTransform());
 
 	enemy_ = new Enemy();
@@ -96,6 +98,7 @@ void GameScene::Initialize() {
 	skyDome = new SkyDome();
 	modelSkyDome = Model::CreateFromOBJ("skydome", true);
 	skyDome->Ini(modelSkyDome);
+	
 
 	
 
@@ -237,7 +240,7 @@ void GameScene::CheckAllCollision(Player* player, Enemy* enemy)
 		//敵弾の座標
 		posB = enemy->GetWorldPosition();
 
-		if (BallCollision(player->GetWorldTransform(), bullet.get()->GetWorldTransform())) {
+		if (BallCollision(player->GetWorldPosition(),1.0f, bullet.get()->GetWorldTransform())) {
 			//自キャラの衝突時コールバックを呼び出す
 			player->OnCollisioin();
 			//敵弾の衝突時コールバックを呼び出す
@@ -269,6 +272,23 @@ bool BallCollision(WorldTransform a, WorldTransform b) {
 	float pos = x + y + z;
 
 	r = (float)pow(a.scale_.x + b.scale_.x, 2);
+	if (pos <= r) {
+		return true;
+	}
+	return false;
+}
+
+bool BallCollision(Vector3 a,float aSize, WorldTransform b) {
+	float x, y, z;
+	float r;
+
+	x = (float)pow(b.translation_.x - a.x, 2);
+	y = (float)pow(b.translation_.y - a.y, 2);
+	z = (float)pow(b.translation_.z - a.z, 2);
+
+	float pos = x + y + z;
+
+	r = (float)pow(aSize + b.scale_.x, 2);
 	if (pos <= r) {
 		return true;
 	}

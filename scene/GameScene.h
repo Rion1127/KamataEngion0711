@@ -126,6 +126,7 @@ class GameScene {
 	/// 
 	SkyDome* skyDome = nullptr;
 
+	Model* gumiship = nullptr;
 	Model* modelSkyDome = nullptr;
 
 };

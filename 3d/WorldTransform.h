@@ -45,4 +45,8 @@ struct WorldTransform {
 	/// 行列を転送する
 	/// </summary>
 	void TransferMatrix();
+
+	void AddScale(float x, float y, float z);
+	void AddRotation(float x, float y, float z);
+	void AddPosition(float x, float y, float z);
 };

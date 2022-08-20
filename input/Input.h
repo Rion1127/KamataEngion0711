@@ -183,3 +183,32 @@ class Input {
 	HWND hwnd_;
 	Vector2 mousePosition_;
 };
+
+//コントローラ
+class Controller {
+public:
+	static Controller* GetInstance();
+
+	void Ini();
+
+	void Update();
+
+	WORD GetButtons(WORD button);
+	WORD GetTriggerButtons(WORD button);
+	WORD GetReleasButtons(WORD button);
+	//false	右スティック
+	//true	左スティック
+	Vector2 GetLStick();
+	Vector2 GetRStick();
+
+	BYTE GetRTrigger();
+	BYTE GetLTrigger();
+private:
+
+	XINPUT_STATE state;
+	XINPUT_STATE preState;
+
+	//バイブレーション
+	XINPUT_VIBRATION vibration;
+
+};

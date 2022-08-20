@@ -11,11 +11,11 @@ void PlayerBullet::Initialize(Model* model, const Vector3& position, const Vecto
 
 	model_ = model;
 	//テクスチャ読み込み
-	textureHandle_ = TextureManager::Load("black.png");
+	textureHandle_ = TextureManager::Load("bullet.png");
 
 	worldTransform_.Initialize();
 
-	matrix.ScaleChange(worldTransform_, 1, 1, 1, 1);
+	matrix.ScaleChange(worldTransform_, 0.1f, 0.1f, 1, 1);
 	matrix.RotaChange(worldTransform_, 0, 0, 0);
 	worldTransform_.translation_ = position;
 	matrix.UpdateMatrix(worldTransform_);

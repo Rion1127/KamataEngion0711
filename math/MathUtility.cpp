@@ -1,4 +1,5 @@
 #include "MathUtility.h"
+#define PI 3.141592
 
 const Vector3 lerp(const Vector3& start, const Vector3& end, const float t)
 {
@@ -72,3 +73,18 @@ Vector3 GetPoint(Vector3 p0, Vector3 p1, Vector3 v0, Vector3 v1, float t)
     float t3 = t2 * t;
     return c0 * t3 + c1 * t2 + c2 * t + c3;
 }
+
+#pragma region 変換
+//ラジアンから角度
+float ConvertRadianToAngle(float radian) {
+    float angle = 180 / PI * radian;
+    return angle;
+}
+
+//角度からラジアン
+float ConvertAngleToRadian(float angle) {
+    float radian = PI / 180 * angle;
+    return radian;
+}
+
+#pragma endregion
