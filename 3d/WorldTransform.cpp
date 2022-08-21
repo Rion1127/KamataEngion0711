@@ -45,7 +45,8 @@ void WorldTransform::AddPosition(Vector3 pos)
 Vector3 WorldTransform::GetWorldPosition()
 {
 	Vector3 worldPos =
-	{ matWorld_.m[3][0],
+	{
+		matWorld_.m[3][0],
 		matWorld_.m[3][1],
 		matWorld_.m[3][2]
 	};

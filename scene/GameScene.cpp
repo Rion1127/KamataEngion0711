@@ -51,10 +51,10 @@ void GameScene::Initialize() {
 	debugCamera_ = new DebugCamera(WinApp::kWindowWidth, WinApp::kWindowHeight);
 
 	railCamera_ = new RailCamera();
-	railCamera_->Ini(Vector3(0, 0, -50), Vector3(0, 0, 0));
+	railCamera_->Ini(Vector3(0, 0, -25), Vector3(0, 0, 0));
 
-	//useViewProjevtion = railCamera_->GetViewProjection();
-	useViewProjevtion = debugCamera_->GetViewProjection();
+	useViewProjevtion = railCamera_->GetViewProjection();
+	//useViewProjevtion = debugCamera_->GetViewProjection();
 	//useViewProjevtion = viewProjection_;
 
 	//軸方向表示の表示を有効にする
@@ -87,7 +87,7 @@ void GameScene::Initialize() {
 	//自キャラの初期化
 	gumiship = Model::CreateFromOBJ("gumiship", true);
 	player_->Initialize(gumiship, textureHandle_);
-	//player_->SetParent(railCamera_->GetWorldTransform());
+	player_->SetParent(railCamera_->GetWorldTransform());
 
 	enemy_ = new Enemy();
 	enemy_->Initialize(EnemyModel, enemyTextureHandle_);
@@ -143,6 +143,7 @@ void GameScene::Update()
 	railCamera_->Update();
 	//自キャラ更新
 	player_->Update();
+	player_->Get2DReticlePosition(useViewProjevtion);
 	if (enemy_) {
 		enemy_->Update();
 	}
@@ -194,6 +195,7 @@ void GameScene::Draw() {
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
 	player_->Draw(useViewProjevtion);
+	
 	enemy_->Draw(useViewProjevtion);
 	
 
@@ -223,6 +225,7 @@ void GameScene::Draw() {
 	/// <summary>
 	/// ここに前景スプライトの描画処理を追加できる
 	/// </summary>
+	player_->DrawReticle();
 
 	// デバッグテキストの描画
 	debugText_->DrawAll(commandList);
@@ -268,12 +271,13 @@ void GameScene::CheckAllCollision(Player* player, Enemy* enemy)
 	//自キャラと敵弾すべての当たり判定
 	for (const std::unique_ptr<PlayerBullet>& bullet : playerBullets) {
 		//敵弾の座標
-		
-		if (RayCollision(bullet.get()->GetWorldTransform(), enemy->GetWorldTransform())) {
-			//敵キャラの衝突時コールバックを呼び出す
-			enemy->OnCollisioin();
-			//自弾の衝突時コールバックを呼び出す
-			bullet->OnCollisioin();
+		if(enemy->GetisAlive() == true){
+			if (RayCollision(bullet.get()->GetWorldTransform(), enemy->GetWorldTransform())) {
+				//敵キャラの衝突時コールバックを呼び出す
+				enemy->OnCollisioin();
+				//自弾の衝突時コールバックを呼び出す
+				bullet->OnCollisioin();
+			}
 		}
 	}
 		

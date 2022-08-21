@@ -10,7 +10,7 @@
 
 Enemy::Enemy()
 {
-	
+
 }
 
 void Enemy::Initialize(Model* model, uint32_t textureHandle)
@@ -43,18 +43,19 @@ void Enemy::Initialize(Model* model, uint32_t textureHandle)
 
 void Enemy::Update()
 {
-	//メンバ関数ポインタに入っている関数を呼び出す
-	(this->*spFuncTable[static_cast<size_t>(phase_)])();
+	if (isAlive == true) {
+		//メンバ関数ポインタに入っている関数を呼び出す
+		(this->*spFuncTable[static_cast<size_t>(phase_)])();
 
+		matrix.UpdateMatrix(worldTransform_);
+
+		if (hp <= 0) {
+			isAlive = false;
+		}
+	}
 	//弾更新
 	for (std::unique_ptr<EnemyBullet>& bullet : bullets_) {
 		bullet->Update();
-	}
-
-	matrix.UpdateMatrix(worldTransform_);
-
-	if (hp <= 0) {
-		isAlive = false;
 	}
 }
 
@@ -87,7 +88,7 @@ void Enemy::Shot()
 	// 弾を登録する
 	bullets_.push_back(std::move(newBullet));
 
-	
+
 }
 
 Vector3 Enemy::GetWorldPosition()
@@ -99,14 +100,14 @@ Vector3 Enemy::GetWorldPosition()
 
 void Enemy::Draw(const ViewProjection& viewProjection)
 {
-	//モデルの描画
-	model_->Draw(worldTransform_, viewProjection, textureHandle_);
-
+	if (isAlive == true) {
+		//モデルの描画
+		model_->Draw(worldTransform_, viewProjection, textureHandle_);
+	}
 	//弾描画
 	for (std::unique_ptr<EnemyBullet>& bullet : bullets_) {
 		bullet->Draw(viewProjection);
 	}
-
 	//デバッグ表示
 	debugText_->SetPos(50, 190);
 	debugText_->Printf(

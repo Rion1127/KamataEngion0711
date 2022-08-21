@@ -39,10 +39,10 @@ private:
 	float time = 0;
 	float timeRate = 0;
 
-	Vector3 start = { 0, 0, -50 };
-	Vector3 p2 = { 0,5,50 };
+	Vector3 start = { 0, 0, -25 };
+	Vector3 p2 = { 0,0,50 };
 	Vector3 p3 = { 0,0,90 };
-	Vector3 end = { 0,-5,150 };
+	Vector3 end = { 0,0,150 };
 	std::vector<Vector3> points{ start,start,p2,p3,end,end };
 	//p1からスタートする
 	size_t startIndex = 1;
@@ -50,5 +50,8 @@ private:
 	std::vector<Vector3> railPoints = points;
 	Vector3 positions[6][100];
 	float t = 0;
+
+
+	float testtimer = 0;
 };
 

@@ -22,11 +22,13 @@ public:
 	WorldTransform GetWorldTransform() { return worldTransform_; }
 	//描画
 	void Draw(ViewProjection viewProjection_);
+	void DrawReticle();
 
 	void CollisionCooltime();
 	void OnCollisioin();
 
 	void SetParent(WorldTransform& worldTransform);
+	void Get2DReticlePosition(ViewProjection viewProjection);
 
 	//弾リストを取得
 	const std::list<std::unique_ptr<PlayerBullet>>& GetBullets() { return bullets_; }
@@ -83,6 +85,12 @@ private:
 	size_t startIndex = 1;
 
 	const int maxCollisionCoolTime = 20;
-	int collisionCoolTime;
+	int collisionCoolTime = maxCollisionCoolTime;
+
+	//レティクル
+	Model* ReticleModel;
+	WorldTransform reticlePosition;
+	//2Dレティクル用スプライト
+	std::unique_ptr <Sprite> sprite2Dreticle;
 };
 

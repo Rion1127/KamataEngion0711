@@ -1,11 +1,13 @@
 #include "MathUtility.h"
+#include "WinApp.h"
 #include "Player.h"
 
 Player::~Player()
 {
 	delete bulletModel;
 	delete model_;
-	
+
+	delete ReticleModel;
 }
 
 void Player::Initialize(Model* model, uint32_t textureHandle)
@@ -33,6 +35,18 @@ void Player::Initialize(Model* model, uint32_t textureHandle)
 	cooltime = 10;
 
 	collisionCoolTime = maxCollisionCoolTime;
+
+	reticlePosition.Initialize();
+	ReticleModel = Model::Create();
+	matrix.ScaleChange(reticlePosition, 1, 1, 1, 1);
+	matrix.RotaChange(reticlePosition, 0, 0, 0);
+	matrix.ChangeTranslation(reticlePosition, 0, 0, 0);
+	matrix.UpdateMatrix(reticlePosition);
+	//レティクルの画像
+	uint32_t reticleTexture = TextureManager::Load("reticle.png");
+	Vector2 pos = { WinApp::kWindowWidth / 2, WinApp::kWindowHeight / 2 };
+	Vector2 mid = { 0.5f,0.5f };
+	sprite2Dreticle.reset(Sprite::Create(reticleTexture, pos, Vector4(1, 1, 1, 1), mid));
 }
 
 void Player::Update()
@@ -69,6 +83,8 @@ void Player::Draw(ViewProjection viewProjection_)
 		bullet->Draw(viewProjection_);
 	}
 
+	//ReticleModel->Draw(reticlePosition, viewProjection_);
+
 	//デバッグ表示
 	debugText_->SetPos(50, 150);
 	debugText_->Printf(
@@ -86,7 +102,15 @@ void Player::Draw(ViewProjection viewProjection_)
 	//デバッグ表示
 	debugText_->SetPos(50, 430);
 	debugText_->Printf(
-		"timeRate:(%f)", timeRate);
+		"reticlePosition:(%f,%f,%f)",
+		reticlePosition.GetWorldPosition().x,
+		reticlePosition.GetWorldPosition().y,
+		reticlePosition.GetWorldPosition().z);
+}
+
+void Player::DrawReticle()
+{
+	sprite2Dreticle.get()->Draw();
 }
 
 void Player::CollisionCooltime()
@@ -96,7 +120,7 @@ void Player::CollisionCooltime()
 
 void Player::OnCollisioin()
 {
-	
+
 	if (collisionCoolTime <= 0) {
 
 		collisionCoolTime = maxCollisionCoolTime;
@@ -106,6 +130,97 @@ void Player::OnCollisioin()
 void Player::SetParent(WorldTransform& worldTransform)
 {
 	worldTransform_.parent_ = &worldTransform;
+}
+
+void Player::Get2DReticlePosition(ViewProjection viewProjection)
+{
+	const float kDistance = 100.0f;
+	Vector3 offset = { 0,0,1.0f };
+	offset = /*MathUtility::*/Vector3toTransform(offset, worldTransform_.matWorld_);
+	offset = offset.normalize() * kDistance ;
+	reticlePosition.translation_ = worldTransform_.GetWorldPosition() + offset;
+	matrix.UpdateMatrix(reticlePosition);
+
+	/*Vector3 reticle2DPosition = reticlePosition.GetWorldPosition();*/
+
+	Vector4 vec4Reti2Dpos = {
+		reticlePosition.GetWorldPosition().x * 0.8f,
+		reticlePosition.GetWorldPosition().y * 1.6f,
+		40,
+		1
+	};
+	//ビューポート行列
+	// ビューポート行列（スクリーン行列）の作成
+	float w = WinApp::kWindowWidth / 2.0f;
+	float h = WinApp::kWindowHeight / 2.0f;
+
+	Matrix4 matViewport = {
+		w , 0 , 0 , 0 ,
+		0 ,-h , 0 , 0 ,
+		0 , 0 , 1 , 0 ,
+		w /*+ reticlePosition.GetWorldPosition().x*/ , h + reticlePosition.GetWorldPosition().y * 9 , 0 , 1
+	};
+	
+	/*reticle2DPosition = MathUtility::Vector3Transform(reticle2DPosition, viewProjection.matView);
+	reticle2DPosition = MathUtility::Vector3Transform(reticle2DPosition, viewProjection.matProjection);
+	reticle2DPosition = MathUtility::Vector3Transform(reticle2DPosition, matViewport);*/
+
+	vec4Reti2Dpos = B(vec4Reti2Dpos, viewProjection.matView);
+	vec4Reti2Dpos = B(vec4Reti2Dpos, viewProjection.matProjection);
+	vec4Reti2Dpos = B(vec4Reti2Dpos, matViewport);
+	vec4Reti2Dpos = W(vec4Reti2Dpos);
+
+	/*Vector4 vec = { -2,2,0,1 };
+	
+	Matrix4 mat1 = {
+		1,0,0,0,
+		0,1,0,0,
+		0,0,1,0,
+		0,0,0,1
+	};
+	Matrix4 mat2 = {
+		1,0,0,0,
+		0,1,0,0,
+		0,0,1,0,
+		0,0,3,1
+	};
+	Matrix4 mat3 = {
+		0.75f,0, 0,0,
+			0,1, 0,0,
+			0,0, 1,1,
+			0,0,-1,0
+	};
+	Matrix4 mat4 = {
+		320,   0, 0,0,
+		  0,-240, 0,0,
+		  0,   0, 1,0,
+		320, 240, 0,1
+	};
+	vec = B(vec, mat1);
+
+	vec = B(vec, mat2);
+
+	vec = B(vec, mat3);
+	vec = B(vec, mat4);
+	vec = W(vec);*/
+
+	////ビュー行列とプロジェクション行列、ビューポート行列を合成する
+	//Matrix4 matViewProjectionViewPort = viewProjection.matView;
+	//matViewProjectionViewPort *= viewProjection.matProjection;
+	//matViewProjectionViewPort *= matViewport;
+
+	////ワールド→スクリーン座標変換（ここで3Dから2Dになる）
+	//
+	//reticle2DPosition = /*MathUtility::Vector3TransformCoord*/ConvertWorldToScreen(reticle2DPosition, matViewProjectionViewPort);
+	//スプライトのレティクルに座標設定
+	sprite2Dreticle.get()->SetPosition(Vector2(vec4Reti2Dpos.x, vec4Reti2Dpos.y - 150));
+
+	//デバッグ表示
+	debugText_->SetPos(50, 450);
+	debugText_->Printf(
+		"vec4Reti2Dpos:(%f,%f)",
+		vec4Reti2Dpos.x,
+		vec4Reti2Dpos.y);
 }
 
 void Player::Move()
@@ -140,9 +255,6 @@ void Player::Move()
 	//Vector3 b = lerp(p1, end, nowtime);
 	//position = ease_in_out(a, b, nowtime);*/
 	//position = SplinePosition(points, startIndex, timeRate);
-
-	
-
 #pragma region 移動
 	//押した方向で移動ベクトルを変更
 	if (input_->PushKey(DIK_A)) {
@@ -160,8 +272,8 @@ void Player::Move()
 
 	//Lスティックで移動する
 	Vector2 speed;
-	speed.x += pad.GetLStick().x * 0.000005f;
-	speed.y -= pad.GetLStick().y * 0.000005f;
+	speed.x += pad.GetLStick().x * 0.000003f;
+	speed.y -= pad.GetLStick().y * 0.000003f;
 	speed.y *= 0.6f;
 
 	if (speed.x >= 0.6f) {
@@ -183,34 +295,35 @@ void Player::Move()
 
 	worldTransform_.translation_ += move;
 	worldTransform_.translation_ += speed;
-	
+
 	//移動限界座標
 	const float moveLimitX = 15;
-	const float moveLimitY = 9;
+	const float moveLimitY = 8;
 	//範囲を超えない処理
 	worldTransform_.translation_.x = max(worldTransform_.translation_.x, -moveLimitX);
 	worldTransform_.translation_.x = min(worldTransform_.translation_.x, +moveLimitX);
-	worldTransform_.translation_.y = max(worldTransform_.translation_.y, -moveLimitY-3);
+	worldTransform_.translation_.y = max(worldTransform_.translation_.y, -moveLimitY - 5);
 	worldTransform_.translation_.y = min(worldTransform_.translation_.y, +moveLimitY - 5);
 #pragma endregion
 
 #pragma region 回転
 	Vector3 rotSpeed(0, 0, 0);
+	float rotAdjusment = 4.5f;
 	//徐々に回転させる
 	if (speed.x > 0) {
-		rotSpeed.y = ConvertAngleToRadian(speed.x * 3.5f);
-		rotSpeed.z = ConvertAngleToRadian(-speed.x * 3.5f);
+		rotSpeed.y = ConvertAngleToRadian(speed.x * rotAdjusment);
+		rotSpeed.z = ConvertAngleToRadian(-speed.x * rotAdjusment);
 	}
 	else if (speed.x < 0) {
-		rotSpeed.y = ConvertAngleToRadian(speed.x * 3.5f);
-		rotSpeed.z = ConvertAngleToRadian(-speed.x * 3.5f);
+		rotSpeed.y = ConvertAngleToRadian(speed.x * rotAdjusment);
+		rotSpeed.z = ConvertAngleToRadian(-speed.x * rotAdjusment);
 	}
 
 	if (speed.y > 0) {
-		rotSpeed.x = -ConvertAngleToRadian(speed.y * 3.5f);
+		rotSpeed.x = -ConvertAngleToRadian(speed.y * rotAdjusment);
 	}
 	else if (speed.y < 0) {
-		rotSpeed.x = -ConvertAngleToRadian(speed.y * 3.5f);
+		rotSpeed.x = -ConvertAngleToRadian(speed.y * rotAdjusment);
 	}
 
 	Vector2 hikaku(0, 0);
@@ -302,15 +415,17 @@ void Player::Attack()
 				worldTransform_.matWorld_.m[3][2] };
 
 			// 弾の速度
-			const float kBulletSpeed = 1.0f;
+			const float kBulletSpeed = 3.5f;
 			Vector3 velocity(0, 0, kBulletSpeed);
 
 			// 速度ベクトルを自機の向きに合わせて回転させる
 			velocity = transform(velocity, worldTransform_.matWorld_);
 			velocity.normalize();
+			velocity *= kBulletSpeed;
+
 			// 弾生成、初期化
 			std::unique_ptr<PlayerBullet> newBullet = std::make_unique<PlayerBullet>();
-			newBullet->Initialize(bulletModel, pos,worldTransform_.rotation_, velocity);
+			newBullet->Initialize(bulletModel, pos, worldTransform_.rotation_, velocity);
 
 			// 弾を登録
 			bullets_.push_back(std::move(newBullet));

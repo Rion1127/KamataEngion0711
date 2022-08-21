@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include <vector>
 #include "Vector3.h"
+#include "vector4.h"
 #include "Matrix4.h"
 
 namespace MathUtility {
@@ -79,3 +80,14 @@ Vector3 GetPoint(Vector3 p0, Vector3 p1, Vector3 v0, Vector3 v1, float t);
 float ConvertRadianToAngle(float radian);
 //角度からラジアン
 float ConvertAngleToRadian(float angle);
+//ワールド座標→スクリーン座標変換
+Vector3 ConvertWorldToScreen(Vector3 p, Matrix4 m);
+//ワールド座標→スクリーン座標変換
+Vector3 Vector3toTransform(Vector3 v, Matrix4 m);
+Vector3 Vector3toTransformW(Vector3 v, Matrix4 m);
+
+//ベクトルと行列の掛け算
+Vector4 A(Vector4 v, Matrix4 m);
+Vector4 B(Vector4 v, Matrix4 m);
+//W徐算
+Vector4 W(Vector4 v);

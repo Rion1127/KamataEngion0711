@@ -46,11 +46,12 @@ void RailCamera::Ini(Vector3 pos, Vector3 rot)
 
 void RailCamera::Update()
 {
-	//Move();
+	//ƒŒ[ƒ‹ƒJƒƒ‰‚Ì‹““®
+	Move();
 
-	float speed = -0.05f;
+	/*float speed = -0.05f;
 	worldTransform.scale_ = { 1,1,1 };
-	worldTransform.translation_ += { 0,0,-speed };
+	worldTransform.translation_ += { 0,0,-speed };*/
 	
 	matrix.UpdateMatrix(worldTransform);
 

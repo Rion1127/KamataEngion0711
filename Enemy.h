@@ -16,6 +16,7 @@ public:
 	void Update();
 
 	void Shot();
+	bool GetisAlive() { return isAlive; }
 	Vector3 GetWorldPosition();
 	WorldTransform GetWorldTransform() { return worldTransform_; }
 	void SetPlayer(Player* player) { player_ = player; }
@@ -39,7 +40,8 @@ private:
 
 	DebugText* debugText_ = nullptr;
 
-	bool isAlive;
+	//HP
+	bool isAlive = true;
 	const int maxHp = 5;
 	int hp = maxHp;
 
