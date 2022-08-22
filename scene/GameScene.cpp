@@ -132,8 +132,12 @@ void GameScene::Initialize() {
 		t = 0;
 	}
 
-
-
+	//objModel = Model::CreateFromOBJ("object",true);
+	objWorldTransform.Initialize();
+	objWorldTransform.translation_ = { 8,0,50 };
+	objWorldTransform.scale_ = { 1,1,1 };
+	objWorldTransform.rotation_ = { 0,0,0 };
+	matrix.UpdateMatrix(objWorldTransform);
 }
 
 void GameScene::Update()
@@ -219,6 +223,9 @@ void GameScene::Draw() {
 	
 
 	skyDome->Draw(viewProjection_);
+
+	//objModel->Draw(objWorldTransform, useViewProjevtion);
+
 	//レールカメラの通る線を引く
 	//railCamera_->DrawRail();
 

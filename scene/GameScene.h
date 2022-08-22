@@ -142,4 +142,5 @@ class GameScene {
 	Model* gumiship = nullptr;
 	Model* modelSkyDome = nullptr;
 
+	WorldTransform objWorldTransform;
 };
