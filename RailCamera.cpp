@@ -70,21 +70,15 @@ void RailCamera::Update()
 	viewProjection.TransferMatrix();
 
 	//デバッグ表示
-	debugText_->SetPos(50, 270);
+	/*debugText_->SetPos(50, 270);
 	debugText_->Printf(
-		"RailCamera.eye:(%f,%f,%f)", viewProjection.eye.x,
-		viewProjection.eye.y,
-		viewProjection.eye.z);
-	//debugText_->SetPos(50, 270);
-	//debugText_->Printf(
-	//	"viewProjection.up:(%f,%f,%f)", viewProjection.up.x,
-	//	viewProjection.up.y,
-	//	viewProjection.up.z);
+		"time:(%f)", time);
+	debugText_->SetPos(50, 290);
+	debugText_->Printf(
+		"timeRate:(%f)", timeRate);
 	debugText_->SetPos(50, 310);
 	debugText_->Printf(
-		"viewProjection.target:(%f,%f,%f)", viewProjection.target.x,
-		viewProjection.target.y,
-		viewProjection.target.z);
+		"time / 120:(%f)", time / 60);*/
 }
 
 void RailCamera::Move()
@@ -104,7 +98,7 @@ void RailCamera::Move()
 		}
 	}
 	
-	time += 0.3f;
+	time += 0.1f;
 	//timeRate / FPS　で1秒のカウントをnowTimeに代入する 
 	timeRate = time / 120;
 

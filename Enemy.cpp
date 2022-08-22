@@ -13,6 +13,11 @@ Enemy::Enemy()
 
 }
 
+Enemy::~Enemy()
+{
+	delete bulletModel;
+}
+
 void Enemy::Initialize(Model* model, uint32_t textureHandle)
 {
 	assert(model);
@@ -28,12 +33,56 @@ void Enemy::Initialize(Model* model, uint32_t textureHandle)
 	worldTransform_.Initialize();
 
 	matrix.ScaleChange(worldTransform_, 1, 1, 1, 1);
-	matrix.RotaChange(worldTransform_, 0, 0, 0);
+	matrix.RotaChange(worldTransform_, 0, 0,ConvertAngleToRadian(10));
 	matrix.ChangeTranslation(worldTransform_, 0, 3, 50);
 	matrix.UpdateMatrix(worldTransform_);
-
+	//エフェクト
+	effectTexture = TextureManager::Load("white.png");
+	effectWorldTransform_.Initialize();
+	matrix.ScaleChange(effectWorldTransform_, 1.1f, 1.1f, 1.1f, 1);
+	matrix.RotaChange(effectWorldTransform_, worldTransform_);
+	matrix.ChangeTranslation(effectWorldTransform_,worldTransform_);
+	matrix.UpdateMatrix(effectWorldTransform_);
+	effectAliveTime = 5;
 
 	//Shot();
+	bulletModel = Model::Create();
+
+	phese_ApproachIni();
+
+	collisionCoolTime = maxCollisionCoolTime;
+	num = 0;
+}
+
+void Enemy::Initialize(Model* model, uint32_t textureHandle, Vector3 pos)
+{
+	assert(model);
+
+	//テクスチャ読み込み
+	textureHandle_ = textureHandle;
+	model_ = model;
+
+	//シングルトンインスタンスを取得する
+	input_ = Input::GetInstance();
+	debugText_ = DebugText::GetInstance();
+
+	worldTransform_.Initialize();
+
+	matrix.ScaleChange(worldTransform_, 1, 1, 1, 1);
+	matrix.RotaChange(worldTransform_, 0, 0, ConvertAngleToRadian(0));
+	matrix.ChangeTranslation(worldTransform_, pos.x, pos.y, pos.z);
+	matrix.UpdateMatrix(worldTransform_);
+	//エフェクト
+	effectTexture = TextureManager::Load("white.png");
+	effectWorldTransform_.Initialize();
+	matrix.ScaleChange(effectWorldTransform_, 1.1f, 1.1f, 1.1f, 1);
+	matrix.RotaChange(effectWorldTransform_, worldTransform_);
+	matrix.ChangeTranslation(effectWorldTransform_, worldTransform_);
+	matrix.UpdateMatrix(effectWorldTransform_);
+	effectAliveTime = 5;
+
+	//Shot();
+	bulletModel = Model::Create();
 
 	phese_ApproachIni();
 
@@ -52,11 +101,17 @@ void Enemy::Update()
 		if (hp <= 0) {
 			isAlive = false;
 		}
+		//エフェクトの出現座標を更新
+		matrix.RotaChange(effectWorldTransform_, worldTransform_);
+		matrix.ChangeTranslation(effectWorldTransform_, worldTransform_);
+		matrix.UpdateMatrix(effectWorldTransform_);
 	}
 	//弾更新
 	for (std::unique_ptr<EnemyBullet>& bullet : bullets_) {
 		bullet->Update();
 	}
+
+	
 }
 
 void Enemy::Shot()
@@ -82,12 +137,21 @@ void Enemy::Shot()
 	// ベクトルの長さを、速さに合わせる。
 	diffVec *= kBulletSpped;
 
+	// 弾の速度
+	
+	Vector3 velocity2(0, 0, kBulletSpped);
+
+	// 速度ベクトルを自機の向きに合わせて回転させる
+	velocity2 = transform(velocity2, worldTransform_.matWorld_);
+	velocity2.normalize();
+	velocity2 *= kBulletSpped;
+
 	// 弾を生成し、初期化
 	std::unique_ptr<EnemyBullet> newBullet = std::make_unique<EnemyBullet>();
-	newBullet->Initialize(model_, worldTransform_.translation_, diffVec);
+	newBullet->Initialize(bulletModel, worldTransform_.translation_, worldTransform_.rotation_, velocity2);
 	// 弾を登録する
 	bullets_.push_back(std::move(newBullet));
-
+	
 
 }
 
@@ -104,6 +168,10 @@ void Enemy::Draw(const ViewProjection& viewProjection)
 		//モデルの描画
 		model_->Draw(worldTransform_, viewProjection, textureHandle_);
 	}
+	if (isCollision == true) {
+		model_->Draw(effectWorldTransform_, viewProjection, effectTexture);
+	}
+
 	//弾描画
 	for (std::unique_ptr<EnemyBullet>& bullet : bullets_) {
 		bullet->Draw(viewProjection);
@@ -125,15 +193,25 @@ void Enemy::Draw(const ViewProjection& viewProjection)
 void Enemy::CollisionCooltime()
 {
 	collisionCoolTime--;
+
+	if (isCollision == true) {
+		effectAliveTime--;
+		if (effectAliveTime <= 0) {
+			isCollision = false;
+			effectAliveTime = 5;
+		}
+	}
 }
 
 void Enemy::OnCollisioin()
 {
+	
 	//hpが0より上の時
 	if (hp > 0) {
 		if (collisionCoolTime <= 0) {
 			num++;
 			hp--;
+			isCollision = true;
 			collisionCoolTime = maxCollisionCoolTime;
 		}
 	}

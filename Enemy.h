@@ -2,16 +2,20 @@
 #include "WorldTransform.h"
 #include "EnemyBullet.h"
 
+
 //自機クラスの前方宣言
 class Player;
+class GameScene;
 
 class Enemy
 {
 public:
 	
 	Enemy();
+	~Enemy();
 	//初期化
 	void Initialize(Model* model, uint32_t textureHandle);
+	void Initialize(Model* model, uint32_t textureHandle, Vector3 pos);
 	//更新
 	void Update();
 
@@ -40,10 +44,13 @@ private:
 
 	DebugText* debugText_ = nullptr;
 
+	Model* bulletModel = nullptr;
+
 	//HP
 	bool isAlive = true;
-	const int maxHp = 5;
+	const int maxHp = 10;
 	int hp = maxHp;
+	bool isCollision = false;
 
 	//行動フェーズ
 	enum class Phase {
@@ -66,7 +73,7 @@ private:
 	//弾
 	std::list<std::unique_ptr<EnemyBullet>> bullets_;
 	//ShotTimer
-	static const int kFireInterval = 60;
+	static const int kFireInterval = 360;
 	int32_t shotCoolTime = 0;
 
 	Player* player_ = nullptr;
@@ -74,4 +81,9 @@ private:
 	const int maxCollisionCoolTime = 20;
 	int collisionCoolTime;
 	int num;
+
+	//エフェクト
+	uint32_t effectTexture;
+	WorldTransform effectWorldTransform_;
+	int effectAliveTime;
 };

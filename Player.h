@@ -22,7 +22,7 @@ public:
 	WorldTransform GetWorldTransform() { return worldTransform_; }
 	//描画
 	void Draw(ViewProjection viewProjection_);
-	void DrawReticle();
+	void DrawUI();
 
 	void CollisionCooltime();
 	void OnCollisioin();
@@ -88,9 +88,10 @@ private:
 	int collisionCoolTime = maxCollisionCoolTime;
 
 	//レティクル
-	Model* ReticleModel;
+	Model* ReticleModel = nullptr;
 	WorldTransform reticlePosition;
 	//2Dレティクル用スプライト
 	std::unique_ptr <Sprite> sprite2Dreticle;
+	std::unique_ptr <Sprite> sprite2HpBar;
 };
 

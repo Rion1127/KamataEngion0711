@@ -6,7 +6,6 @@ Player::~Player()
 {
 	delete bulletModel;
 	delete model_;
-
 	delete ReticleModel;
 }
 
@@ -26,7 +25,7 @@ void Player::Initialize(Model* model, uint32_t textureHandle)
 
 	matrix.ScaleChange(worldTransform_, 1, 1, 1, 1);
 	matrix.RotaChange(worldTransform_, 0, 0, 0);
-	matrix.ChangeTranslation(worldTransform_, 0, 0, 25);
+	matrix.ChangeTranslation(worldTransform_, 0, -10, 20);
 	matrix.UpdateMatrix(worldTransform_);
 
 	pad.Ini();
@@ -47,6 +46,13 @@ void Player::Initialize(Model* model, uint32_t textureHandle)
 	Vector2 pos = { WinApp::kWindowWidth / 2, WinApp::kWindowHeight / 2 };
 	Vector2 mid = { 0.5f,0.5f };
 	sprite2Dreticle.reset(Sprite::Create(reticleTexture, pos, Vector4(1, 1, 1, 1), mid));
+
+	uint32_t hpBarTexture = TextureManager::Load("hpBar2.png");
+	Vector2 hpPos = {
+		WinApp::kWindowWidth /2 + 450,
+		WinApp::kWindowWidth /2 - 70};
+	Vector2 hpBarMid = { 0.5f,0.5f };
+	sprite2HpBar.reset(Sprite::Create(hpBarTexture, hpPos, Vector4(1, 1, 1, 1), hpBarMid));
 }
 
 void Player::Update()
@@ -67,9 +73,11 @@ void Player::Update()
 Vector3 Player::GetWorldPosition()
 {
 	Vector3 worldPos =
-	{ worldTransform_.matWorld_.m[3][0],
+	{
+		worldTransform_.matWorld_.m[3][0],
 		worldTransform_.matWorld_.m[3][1],
-		worldTransform_.matWorld_.m[3][2] };
+		worldTransform_.matWorld_.m[3][2]
+	};
 	return worldPos;
 }
 
@@ -108,9 +116,10 @@ void Player::Draw(ViewProjection viewProjection_)
 		reticlePosition.GetWorldPosition().z);
 }
 
-void Player::DrawReticle()
+void Player::DrawUI()
 {
 	sprite2Dreticle.get()->Draw();
+	sprite2HpBar.get()->Draw();
 }
 
 void Player::CollisionCooltime()
@@ -134,7 +143,7 @@ void Player::SetParent(WorldTransform& worldTransform)
 
 void Player::Get2DReticlePosition(ViewProjection viewProjection)
 {
-	const float kDistance = 100.0f;
+	const float kDistance = 10.0f;
 	Vector3 offset = { 0,0,1.0f };
 	offset = /*MathUtility::*/Vector3toTransform(offset, worldTransform_.matWorld_);
 	offset = offset.normalize() * kDistance ;
@@ -144,9 +153,9 @@ void Player::Get2DReticlePosition(ViewProjection viewProjection)
 	/*Vector3 reticle2DPosition = reticlePosition.GetWorldPosition();*/
 
 	Vector4 vec4Reti2Dpos = {
-		reticlePosition.GetWorldPosition().x * 0.8f,
-		reticlePosition.GetWorldPosition().y * 1.6f,
-		40,
+		reticlePosition.GetWorldPosition().x * 1.7f,
+		reticlePosition.GetWorldPosition().y * 1.4f,
+		5,
 		1
 	};
 	//ビューポート行列
@@ -158,7 +167,7 @@ void Player::Get2DReticlePosition(ViewProjection viewProjection)
 		w , 0 , 0 , 0 ,
 		0 ,-h , 0 , 0 ,
 		0 , 0 , 1 , 0 ,
-		w /*+ reticlePosition.GetWorldPosition().x*/ , h + reticlePosition.GetWorldPosition().y * 9 , 0 , 1
+		w - reticlePosition.GetWorldPosition().x  , h + reticlePosition.GetWorldPosition().y  , 0 , 1
 	};
 	
 	/*reticle2DPosition = MathUtility::Vector3Transform(reticle2DPosition, viewProjection.matView);
@@ -213,8 +222,7 @@ void Player::Get2DReticlePosition(ViewProjection viewProjection)
 	//
 	//reticle2DPosition = /*MathUtility::Vector3TransformCoord*/ConvertWorldToScreen(reticle2DPosition, matViewProjectionViewPort);
 	//スプライトのレティクルに座標設定
-	sprite2Dreticle.get()->SetPosition(Vector2(vec4Reti2Dpos.x, vec4Reti2Dpos.y - 150));
-
+	sprite2Dreticle.get()->SetPosition(Vector2(vec4Reti2Dpos.x, vec4Reti2Dpos.y));
 	//デバッグ表示
 	debugText_->SetPos(50, 450);
 	debugText_->Printf(
@@ -297,7 +305,7 @@ void Player::Move()
 	worldTransform_.translation_ += speed;
 
 	//移動限界座標
-	const float moveLimitX = 15;
+	const float moveLimitX = 10;
 	const float moveLimitY = 8;
 	//範囲を超えない処理
 	worldTransform_.translation_.x = max(worldTransform_.translation_.x, -moveLimitX);

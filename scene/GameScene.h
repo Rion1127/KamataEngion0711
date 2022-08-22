@@ -10,6 +10,7 @@
 #include "ViewProjection.h"
 #include "WorldTransform.h"
 #include "DebugCamera.h"
+#include <sstream>
 
 #include "Matrix.h"
 #include "XMFLOAT3.h"
@@ -68,7 +69,19 @@ class GameScene {
 	//ワールドトランスフォーム
 	WorldTransform worldTransforms_[100];
 	Player* player_ = nullptr;
+
 	Enemy* enemy_ = nullptr;
+	std::list<std::unique_ptr<Enemy>> enemys_;
+	//敵発生コマンド
+	std::stringstream enemyPopCommands;
+	//待機中フラグ
+	bool isWait = false;
+	//待機タイマー
+	int waitTimer = 0;
+	void LoadEnemyPopData();
+	//敵発生コマンドの更新
+	void UpdateEnemyPopCommands();
+	
 
 	//ビュープロジェクション
 	ViewProjection viewProjection_;

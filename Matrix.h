@@ -21,6 +21,13 @@ public:
 
 	void ChangeTranslation(WorldTransform& worldTransform, float tx, float ty, float tz);
 
+	//‰Šúİ’è
+	void ScaleChange(WorldTransform& worldTransform, WorldTransform scale);
+
+	void RotaChange(WorldTransform& worldTransform, WorldTransform rot);
+
+	void ChangeTranslation(WorldTransform& worldTransform, WorldTransform trans);
+
 	//˜A‘±ˆ—
 	void ScaleChange(WorldTransform& worldTransform);
 

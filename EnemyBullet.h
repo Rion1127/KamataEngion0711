@@ -11,7 +11,7 @@ class EnemyBullet
 public:
 	EnemyBullet();
 	//初期化
-	void Initialize(Model* model, const Vector3& position, const Vector3& velocity);
+	void Initialize(Model* model, const Vector3& position,  const Vector3 rot, const Vector3& velocity);
 	//更新
 	void Update();
 	//描画
@@ -29,7 +29,7 @@ private:
 	uint32_t textureHandle_ = 0u;
 
 	//寿命
-	static const int32_t lifeTime = 60 * 2;
+	static const int32_t lifeTime = 60 * 4;
 	//デスタイマー
 	int32_t deathTimer_ = lifeTime;
 	//デスフラグ

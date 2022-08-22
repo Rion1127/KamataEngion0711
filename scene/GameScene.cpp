@@ -4,6 +4,7 @@
 #include "PrimitiveDrawer.h"
 #include "MathUtility.h"
 #include <cassert>
+#include <fstream>
 #define XM_PI 3.141592
 
 bool BallCollision(WorldTransform a, WorldTransform b);
@@ -51,7 +52,7 @@ void GameScene::Initialize() {
 	debugCamera_ = new DebugCamera(WinApp::kWindowWidth, WinApp::kWindowHeight);
 
 	railCamera_ = new RailCamera();
-	railCamera_->Ini(Vector3(0, 0, -25), Vector3(0, 0, 0));
+	railCamera_->Ini(Vector3(0, 10, -25), Vector3(0, 0, 0));
 
 	useViewProjevtion = railCamera_->GetViewProjection();
 	//useViewProjevtion = debugCamera_->GetViewProjection();
@@ -92,6 +93,11 @@ void GameScene::Initialize() {
 	enemy_ = new Enemy();
 	enemy_->Initialize(EnemyModel, enemyTextureHandle_);
 	enemy_->SetPlayer(player_);
+
+	for (std::unique_ptr<Enemy>& enemy : enemys_) {
+		enemy->Initialize(EnemyModel, enemyTextureHandle_);
+		enemy->SetPlayer(player_);
+	}
 
 	//false バイオ :: true カメラ視点
 	isCamera = false;
@@ -148,6 +154,14 @@ void GameScene::Update()
 		enemy_->Update();
 	}
 
+	//弾更新
+	for (std::unique_ptr<Enemy>& enemy : enemys_) {
+		enemy->Update();
+		CheckAllCollision(player_, enemy.get());
+	}
+	LoadEnemyPopData();
+	UpdateEnemyPopCommands();
+
 	CheckAllCollision(player_, enemy_);
 
 
@@ -197,11 +211,16 @@ void GameScene::Draw() {
 	player_->Draw(useViewProjevtion);
 	
 	enemy_->Draw(useViewProjevtion);
+
+	//弾描画
+	for (std::unique_ptr<Enemy>& enemy : enemys_) {
+		enemy->Draw(useViewProjevtion);
+	}
 	
 
 	skyDome->Draw(viewProjection_);
 	//レールカメラの通る線を引く
-	railCamera_->DrawRail();
+	//railCamera_->DrawRail();
 
 	//for (int i = 0; i < 3; i++) {
 	//	for (int j = 0; j < 99; j++) {
@@ -225,7 +244,7 @@ void GameScene::Draw() {
 	/// <summary>
 	/// ここに前景スプライトの描画処理を追加できる
 	/// </summary>
-	player_->DrawReticle();
+	player_->DrawUI();
 
 	// デバッグテキストの描画
 	debugText_->DrawAll(commandList);
@@ -292,6 +311,85 @@ void GameScene::CheckAllCollision(Player* player, Enemy* enemy)
 
 
 	
+}
+
+void GameScene::LoadEnemyPopData()
+{
+	//ファイルを開く
+	std::ifstream file;
+	file.open("Resources\\enemyPop.csv");
+	assert(file.is_open());
+
+	//ファイルの内容を文字列ストリームにコピー
+	enemyPopCommands << file.rdbuf();
+	//ファイルを閉じる
+	file.close();
+
+}
+
+void GameScene::UpdateEnemyPopCommands()
+{
+	//待機処理
+	if (isWait) {
+		waitTimer--;
+		if (waitTimer <= 0) {
+			//待機完了
+			isWait = false;
+		}
+		return;
+	}
+
+
+	//1行分の文字列を入れる変数
+	std::string line;
+	//コマンド実行ループ
+	while(std::getline(enemyPopCommands,line)) {
+		//1行分の文字列をストリームに変換して解析しやすくする
+		std::istringstream line_stream(line);
+
+		std::string word;
+		//、区切りで行の先頭文字列を取得
+		std::getline(line_stream, word, ',');
+		// "//"から始まる行はコメント
+		if (word.find("//") == 0) {
+			//コメント行を飛ばす
+			continue;
+		}
+		//POPコマンド
+		if (word.find("POP") == 0) {
+			//x座標
+			std::getline(line_stream, word, ',');
+			float x = (float)std::atof(word.c_str());
+			//y座標
+			std::getline(line_stream, word, ',');
+			float y = (float)std::atof(word.c_str());
+			//z座標
+			std::getline(line_stream, word, ',');
+			float z = (float)std::atof(word.c_str());
+			
+			Vector3 pos = { x,y,z };
+
+			// 弾を生成し、初期化
+			std::unique_ptr<Enemy> newenemy = std::make_unique<Enemy>();
+			newenemy->Initialize(model_,enemyTextureHandle_, pos);
+			newenemy->SetPlayer(player_);
+			// 弾を登録する
+			enemys_.push_back(std::move(newenemy));
+		}
+		else if (word.find("WAIT") == 0) {
+			std::getline(line_stream, word, ',');
+			//待ち時間
+			int32_t waitTime = atoi(word.c_str());
+
+			//待機開始
+			isWait = true;
+			waitTimer = waitTime;
+			//コマンドループを抜ける
+			break;
+		}
+
+
+	}
 }
 
 

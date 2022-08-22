@@ -90,6 +90,62 @@ void Matrix::ChangeTranslation(WorldTransform& worldTransform, float tx, float t
 	matResult.Trans.m[3][2] = worldTransform.translation_.z;
 }
 
+void Matrix::ScaleChange(WorldTransform& worldTransform, WorldTransform scale)
+{
+	//X,Y,Z方向のスケーリングを設定
+	worldTransform.scale_ = { scale.scale_.x, scale.scale_.y, scale.scale_.z };
+	//スケーリング行列を宣言
+
+	matResult.Scale.m[0][0] = worldTransform.scale_.x;
+	matResult.Scale.m[1][1] = worldTransform.scale_.y;
+	matResult.Scale.m[2][2] = worldTransform.scale_.z;
+	matResult.Scale.m[3][3] = 1;
+}
+
+void Matrix::RotaChange(WorldTransform& worldTransform, WorldTransform rot)
+{
+	//X、Y、Z軸周りの回転角を設定
+	worldTransform.rotation_ = { rot.rotation_.x,rot.rotation_.y,rot.rotation_.z };
+	//X軸回転行列を宣言
+	Matrix4 matRotX, matRotY, matRotZ;
+
+	matRotX.m[0][0] = 1;
+	matRotX.m[1][1] = cos(worldTransform.rotation_.x);
+	matRotX.m[1][2] = sin(worldTransform.rotation_.x);
+	matRotX.m[2][1] = -sin(worldTransform.rotation_.x);
+	matRotX.m[2][2] = cos(worldTransform.rotation_.x);
+	matRotX.m[3][3] = 1;
+
+	matRotY.m[0][0] = cos(worldTransform.rotation_.y);
+	matRotY.m[0][2] = -sin(worldTransform.rotation_.y);
+	matRotY.m[1][1] = 1;
+	matRotY.m[2][0] = sin(worldTransform.rotation_.y);
+	matRotY.m[2][2] = cos(worldTransform.rotation_.y);
+	matRotY.m[3][3] = 1;
+
+	matRotZ.m[0][0] = cos(worldTransform.rotation_.z);
+	matRotZ.m[0][1] = sin(worldTransform.rotation_.z);
+	matRotZ.m[1][0] = -sin(worldTransform.rotation_.z);
+	matRotZ.m[1][1] = cos(worldTransform.rotation_.z);
+	matRotZ.m[2][2] = 1;
+	matRotZ.m[3][3] = 1;
+
+	//各軸の回転行列を合成
+	matResult.Rot = matRotZ;
+	matResult.Rot *= matRotX;
+	matResult.Rot *= matRotY;
+}
+
+void Matrix::ChangeTranslation(WorldTransform& worldTransform, WorldTransform trans)
+{
+	//Ｘ，Ｙ，Ｚ軸周りの平行移動を設定
+	worldTransform.translation_ = { trans.translation_.x,trans.translation_.y,trans.translation_.z };
+
+	matResult.Trans.m[3][0] = worldTransform.translation_.x;
+	matResult.Trans.m[3][1] = worldTransform.translation_.y;
+	matResult.Trans.m[3][2] = worldTransform.translation_.z;
+}
+
 //連続処理
 void Matrix::ScaleChange(WorldTransform& worldTransform)
 {

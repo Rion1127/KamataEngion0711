@@ -4,18 +4,18 @@ EnemyBullet::EnemyBullet()
 {
 }
 
-void EnemyBullet::Initialize(Model* model, const Vector3& position, const Vector3& velocity)
+void EnemyBullet::Initialize(Model* model, const Vector3& position, const Vector3 rot, const Vector3& velocity)
 {
 	assert(model);
 
 	model_ = model;
 	//テクスチャ読み込み
-	textureHandle_ = TextureManager::Load("black.png");
+	textureHandle_ = TextureManager::Load("bullet.png");
 
 	worldTransform_.Initialize();
 
-	matrix.ScaleChange(worldTransform_, 1, 1, 1, 1);
-	matrix.RotaChange(worldTransform_, 0, 0, 0);
+	matrix.ScaleChange(worldTransform_, 0.2f, 0.1f, 3, 1);
+	matrix.RotaChange(worldTransform_, rot.x, rot.y, rot.z);
 	worldTransform_.translation_ = position;
 	matrix.UpdateMatrix(worldTransform_);
 
