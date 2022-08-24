@@ -142,5 +142,10 @@ class GameScene {
 	Model* gumiship = nullptr;
 	Model* modelSkyDome = nullptr;
 
-	WorldTransform objWorldTransform;
+	Model* blueOrangeObj;
+	std::list<std::unique_ptr<WorldTransform>> objWorldTransforms_;
+	//オブジェ発生コマンド
+	std::stringstream objCommands;
+	void LoadObjData();
+	void IniObjData();
 };

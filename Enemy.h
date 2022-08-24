@@ -5,7 +5,6 @@
 
 //自機クラスの前方宣言
 class Player;
-class GameScene;
 
 class Enemy
 {
@@ -48,7 +47,7 @@ private:
 
 	//HP
 	bool isAlive = true;
-	const int maxHp = 10;
+	const int maxHp = 7;
 	int hp = maxHp;
 	bool isCollision = false;
 

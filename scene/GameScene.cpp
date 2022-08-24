@@ -22,6 +22,7 @@ GameScene::~GameScene()
 	delete enemy_;
 	delete modelSkyDome;
 	delete skyDome;
+	delete blueOrangeObj;
 	delete railCamera_;
 }
 
@@ -59,9 +60,9 @@ void GameScene::Initialize() {
 	//useViewProjevtion = viewProjection_;
 
 	//軸方向表示の表示を有効にする
-	AxisIndicator::GetInstance()->SetVisible(true);
+	//AxisIndicator::GetInstance()->SetVisible(true);
 	//軸方向表示が参考するビュープロジェクションを指定する（アドレス渡し）
-	AxisIndicator::GetInstance()->SetTargetViewProjection(&debugCamera_->GetViewProjection());
+	//AxisIndicator::GetInstance()->SetTargetViewProjection(&debugCamera_->GetViewProjection());
 	////ライン描画が参照するビュープロジェクションを指定する（アドレス渡し）
 	PrimitiveDrawer::GetInstance()->SetViewProjection(&useViewProjevtion);
 #pragma region ライン描画座標
@@ -132,12 +133,9 @@ void GameScene::Initialize() {
 		t = 0;
 	}
 
-	//objModel = Model::CreateFromOBJ("object",true);
-	objWorldTransform.Initialize();
-	objWorldTransform.translation_ = { 8,0,50 };
-	objWorldTransform.scale_ = { 1,1,1 };
-	objWorldTransform.rotation_ = { 0,0,0 };
-	matrix.UpdateMatrix(objWorldTransform);
+	blueOrangeObj = Model::CreateFromOBJ("testObj", true);
+	LoadObjData();
+	IniObjData();
 }
 
 void GameScene::Update()
@@ -163,6 +161,7 @@ void GameScene::Update()
 		enemy->Update();
 		CheckAllCollision(player_, enemy.get());
 	}
+
 	LoadEnemyPopData();
 	UpdateEnemyPopCommands();
 
@@ -223,9 +222,10 @@ void GameScene::Draw() {
 	
 
 	skyDome->Draw(viewProjection_);
-
-	//objModel->Draw(objWorldTransform, useViewProjevtion);
-
+	//水色とオレンジのオブジェクト
+	for (std::unique_ptr<WorldTransform>& worldTransform : objWorldTransforms_) {
+		blueOrangeObj->Draw(*worldTransform.get(), useViewProjevtion);
+	}
 	//レールカメラの通る線を引く
 	//railCamera_->DrawRail();
 
@@ -374,8 +374,11 @@ void GameScene::UpdateEnemyPopCommands()
 			std::getline(line_stream, word, ',');
 			float z = (float)std::atof(word.c_str());
 			
-			Vector3 pos = { x,y,z };
-
+			Vector3 pos = {
+				x + railCamera_->GetWorldTransform().translation_.x,
+				y /*+ railCamera_->GetWorldTransform().translation_.y*/,
+				z + railCamera_->GetWorldTransform().translation_.z };
+			
 			// 弾を生成し、初期化
 			std::unique_ptr<Enemy> newenemy = std::make_unique<Enemy>();
 			newenemy->Initialize(model_,enemyTextureHandle_, pos);
@@ -396,6 +399,111 @@ void GameScene::UpdateEnemyPopCommands()
 		}
 
 
+	}
+}
+
+void GameScene::LoadObjData()
+{
+	//ファイルを開く
+	std::ifstream file;
+	file.open("Resources\\objData.csv");
+	assert(file.is_open());
+
+	//ファイルの内容を文字列ストリームにコピー
+	objCommands << file.rdbuf();
+	//ファイルを閉じる
+	file.close();
+}
+
+void GameScene::IniObjData()
+{
+	//座標
+	Vector3 pos{};
+	Vector3 rot{};
+	Vector3 scale{};
+
+	//1行分の文字列を入れる変数
+	std::string line;
+	//コマンド実行ループ
+	while (std::getline(objCommands, line)) {
+		//1行分の文字列をストリームに変換して解析しやすくする
+		std::istringstream line_stream(line);
+
+		std::string word;
+		//、区切りで行の先頭文字列を取得
+		std::getline(line_stream, word, ',');
+		// "//"から始まる行はコメント
+		if (word.find("//") == 0) {
+			//コメント行を飛ばす
+			continue;
+		}
+		//座標コマンド
+		if (word.find("POS") == 0) {
+			//x座標
+			std::getline(line_stream, word, ',');
+			float x = (float)std::atof(word.c_str());
+			//y座標
+			std::getline(line_stream, word, ',');
+			float y = (float)std::atof(word.c_str());
+			//z座標
+			std::getline(line_stream, word, ',');
+			float z = (float)std::atof(word.c_str());
+
+			//座標を代入
+			pos = { x,y,z };
+
+		}
+		//、区切りで行の先頭文字列を取得
+		std::getline(line_stream, word, ',');
+		//回転コマンド
+		if (word.find("ROT") == 0) {
+			//x座標
+			std::getline(line_stream, word, ',');
+			float x = (float)std::atof(word.c_str());
+			//y座標
+			std::getline(line_stream, word, ',');
+			float y = (float)std::atof(word.c_str());
+			//z座標
+			std::getline(line_stream, word, ',');
+			float z = (float)std::atof(word.c_str());
+
+			//回転を代入
+			rot =
+			{
+				ConvertAngleToRadian(x),
+				ConvertAngleToRadian(y),
+				ConvertAngleToRadian(z)
+			};
+		}
+		//、区切りで行の先頭文字列を取得
+		std::getline(line_stream, word, ',');
+		//スケールコマンド
+		if (word.find("SCL") == 0) {
+			//x座標
+			std::getline(line_stream, word, ',');
+			float x = (float)std::atof(word.c_str());
+			//y座標
+			std::getline(line_stream, word, ',');
+			float y = (float)std::atof(word.c_str());
+			//z座標
+			std::getline(line_stream, word, ',');
+			float z = (float)std::atof(word.c_str());
+
+			//スケールを代入
+			scale = { x,y,z };
+		}
+
+		// 弾を生成し、初期化
+		std::unique_ptr<WorldTransform> newObj = std::make_unique<WorldTransform>();
+		newObj.get()->translation_ = pos;
+		newObj.get()->rotation_ = rot;
+		newObj.get()->scale_ = scale;
+		objWorldTransforms_.push_back(std::move(newObj));
+	}
+	for (std::unique_ptr<WorldTransform>& worldTransform : objWorldTransforms_) {
+		worldTransform.get()->Initialize();
+		assert(worldTransform.get());
+		matrix.UpdateMatrix(*worldTransform.get());
 	}
 }
 

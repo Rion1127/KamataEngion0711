@@ -176,18 +176,18 @@ void Enemy::Draw(const ViewProjection& viewProjection)
 	for (std::unique_ptr<EnemyBullet>& bullet : bullets_) {
 		bullet->Draw(viewProjection);
 	}
-	//デバッグ表示
-	debugText_->SetPos(50, 190);
-	debugText_->Printf(
-		"enemyPos:(%f,%f,%f)",
-		worldTransform_.translation_.x,
-		worldTransform_.translation_.y,
-		worldTransform_.translation_.z);
+	////デバッグ表示
+	//debugText_->SetPos(50, 190);
+	//debugText_->Printf(
+	//	"enemyPos:(%f,%f,%f)",
+	//	worldTransform_.translation_.x,
+	//	worldTransform_.translation_.y,
+	//	worldTransform_.translation_.z);
 
-	debugText_->SetPos(50, 210);
-	debugText_->Printf(
-		"hp:%d",
-		hp);
+	//debugText_->SetPos(50, 210);
+	//debugText_->Printf(
+	//	"hp:%d",
+	//	hp);
 }
 
 void Enemy::CollisionCooltime()

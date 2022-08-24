@@ -99,21 +99,21 @@ void Player::Draw(ViewProjection viewProjection_)
 		"player:(%f,%f,%f)", GetWorldPosition().x,
 		GetWorldPosition().y,
 		GetWorldPosition().z);
-	//デバッグ表示
-	debugText_->SetPos(50, 170);
-	debugText_->Printf(
-		"startIndex:(%d)", startIndex);
-	//デバッグ表示
-	debugText_->SetPos(50, 410);
-	debugText_->Printf(
-		"timeRate:(%f)", time / 120);
-	//デバッグ表示
-	debugText_->SetPos(50, 430);
-	debugText_->Printf(
-		"reticlePosition:(%f,%f,%f)",
-		reticlePosition.GetWorldPosition().x,
-		reticlePosition.GetWorldPosition().y,
-		reticlePosition.GetWorldPosition().z);
+	////デバッグ表示
+	//debugText_->SetPos(50, 170);
+	//debugText_->Printf(
+	//	"startIndex:(%d)", startIndex);
+	////デバッグ表示
+	//debugText_->SetPos(50, 410);
+	//debugText_->Printf(
+	//	"timeRate:(%f)", time / 120);
+	////デバッグ表示
+	//debugText_->SetPos(50, 430);
+	//debugText_->Printf(
+	//	"reticlePosition:(%f,%f,%f)",
+	//	reticlePosition.GetWorldPosition().x,
+	//	reticlePosition.GetWorldPosition().y,
+	//	reticlePosition.GetWorldPosition().z);
 }
 
 void Player::DrawUI()
@@ -223,12 +223,12 @@ void Player::Get2DReticlePosition(ViewProjection viewProjection)
 	//reticle2DPosition = /*MathUtility::Vector3TransformCoord*/ConvertWorldToScreen(reticle2DPosition, matViewProjectionViewPort);
 	//スプライトのレティクルに座標設定
 	sprite2Dreticle.get()->SetPosition(Vector2(vec4Reti2Dpos.x, vec4Reti2Dpos.y));
-	//デバッグ表示
-	debugText_->SetPos(50, 450);
-	debugText_->Printf(
-		"vec4Reti2Dpos:(%f,%f)",
-		vec4Reti2Dpos.x,
-		vec4Reti2Dpos.y);
+	////デバッグ表示
+	//debugText_->SetPos(50, 450);
+	//debugText_->Printf(
+	//	"vec4Reti2Dpos:(%f,%f)",
+	//	vec4Reti2Dpos.x,
+	//	vec4Reti2Dpos.y);
 }
 
 void Player::Move()
