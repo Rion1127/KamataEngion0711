@@ -1,3 +1,4 @@
+
 #include "Matrix.h"
 #include <cassert>
 #include "Model.h"
@@ -6,19 +7,20 @@
 #include <memory>
 #include <list>
 #include "Player.h"
-#include "Enemy.h"
 
-Enemy::Enemy()
+#include "Enemy2.h"
+
+Enemy2::Enemy2()
 {
 
 }
 
-Enemy::~Enemy()
+Enemy2::~Enemy2()
 {
-	delete bulletModel;
+	
 }
 
-void Enemy::Initialize(Model* model, uint32_t textureHandle)
+void Enemy2::Initialize(Model* model, uint32_t textureHandle)
 {
 	assert(model);
 
@@ -33,28 +35,24 @@ void Enemy::Initialize(Model* model, uint32_t textureHandle)
 	worldTransform_.Initialize();
 
 	matrix.ScaleChange(worldTransform_, 1, 1, 1, 1);
-	matrix.RotaChange(worldTransform_, 0, 0,ConvertAngleToRadian(10));
-	matrix.ChangeTranslation(worldTransform_, 0, 3, 50);
+	matrix.RotaChange(worldTransform_, 0, 0, ConvertAngleToRadian(0));
+	matrix.ChangeTranslation(worldTransform_, 0, 15, 0);
 	matrix.UpdateMatrix(worldTransform_);
 	//エフェクト
 	effectTexture = TextureManager::Load("white.png");
 	effectWorldTransform_.Initialize();
 	matrix.ScaleChange(effectWorldTransform_, 1.1f, 1.1f, 1.1f, 1);
 	matrix.RotaChange(effectWorldTransform_, worldTransform_);
-	matrix.ChangeTranslation(effectWorldTransform_,worldTransform_);
+	matrix.ChangeTranslation(effectWorldTransform_, worldTransform_);
 	matrix.UpdateMatrix(effectWorldTransform_);
 	effectAliveTime = 5;
 
-	//Shot();
-	bulletModel = Model::Create();
-
-	phese_ApproachIni();
 
 	collisionCoolTime = maxCollisionCoolTime;
 	num = 0;
 }
 
-void Enemy::Initialize(Model* model, uint32_t textureHandle, Vector3 pos)
+void Enemy2::Initialize(Model* model, uint32_t textureHandle, Vector3 pos)
 {
 	assert(model);
 
@@ -81,16 +79,12 @@ void Enemy::Initialize(Model* model, uint32_t textureHandle, Vector3 pos)
 	matrix.UpdateMatrix(effectWorldTransform_);
 	effectAliveTime = 5;
 
-	//Shot();
-	bulletModel = Model::Create();
-
-	phese_ApproachIni();
 
 	collisionCoolTime = maxCollisionCoolTime;
 	num = 0;
 }
 
-void Enemy::Update()
+void Enemy2::Update()
 {
 	if (isAlive == true) {
 		//メンバ関数ポインタに入っている関数を呼び出す
@@ -109,63 +103,21 @@ void Enemy::Update()
 			matrix.UpdateMatrix(effectWorldTransform_);
 		}
 	}
-	//弾更新
-	for (std::unique_ptr<EnemyBullet>& bullet : bullets_) {
-		bullet->Update();
-	}
-
 	
-}
 
-void Enemy::Shot()
-{
-	assert(player_);
-
-	// 弾の速度
-	const float kBulletSpped = 0.5f;
-
-	// 差分ベクトルを格納する変数
-	Vector3 diffVec;
-
-	// 自キャラ、敵キャラのワールド座標を取得
-	Vector3 playerPos = player_->GetWorldPosition();
-	Vector3 enemyPos = worldTransform_.translation_;
-
-	// 差分ベクトルを求める
-	diffVec = enemyPos - playerPos;
-
-	// 差分ベクトルの正規化
-	diffVec.normalize();
-
-	// ベクトルの長さを、速さに合わせる。
-	diffVec *= kBulletSpped;
-
-	// 弾の速度
-	
-	Vector3 velocity2(0, 0, kBulletSpped);
-
-	// 速度ベクトルを自機の向きに合わせて回転させる
-	velocity2 = transform(velocity2, worldTransform_.matWorld_);
-	velocity2.normalize();
-	velocity2 *= kBulletSpped;
-
-	// 弾を生成し、初期化
-	std::unique_ptr<EnemyBullet> newBullet = std::make_unique<EnemyBullet>();
-	newBullet->Initialize(bulletModel, worldTransform_.translation_, worldTransform_.rotation_, velocity2);
-	// 弾を登録する
-	bullets_.push_back(std::move(newBullet));
-	
 
 }
 
-Vector3 Enemy::GetWorldPosition()
+
+
+Vector3 Enemy2::GetWorldPosition()
 {
 	Vector3 worldPos;
 	worldPos = worldTransform_.translation_;
 	return worldPos;
 }
 
-void Enemy::Draw(const ViewProjection& viewProjection)
+void Enemy2::Draw(const ViewProjection& viewProjection)
 {
 	if (isAlive == true) {
 		//モデルの描画
@@ -175,17 +127,14 @@ void Enemy::Draw(const ViewProjection& viewProjection)
 		model_->Draw(effectWorldTransform_, viewProjection, effectTexture);
 	}
 
-	//弾描画
-	for (std::unique_ptr<EnemyBullet>& bullet : bullets_) {
-		bullet->Draw(viewProjection);
-	}
-	////デバッグ表示
-	//debugText_->SetPos(50, 190);
-	//debugText_->Printf(
-	//	"enemyPos:(%f,%f,%f)",
-	//	worldTransform_.translation_.x,
-	//	worldTransform_.translation_.y,
-	//	worldTransform_.translation_.z);
+	
+	//デバッグ表示
+	debugText_->SetPos(50, 190);
+	debugText_->Printf(
+		"enemyPos:(%f,%f,%f)",
+		worldTransform_.translation_.x,
+		worldTransform_.translation_.y,
+		worldTransform_.translation_.z);
 
 	//debugText_->SetPos(50, 210);
 	//debugText_->Printf(
@@ -193,7 +142,7 @@ void Enemy::Draw(const ViewProjection& viewProjection)
 	//	hp);
 }
 
-void Enemy::CollisionCooltime()
+void Enemy2::CollisionCooltime()
 {
 	collisionCoolTime--;
 
@@ -206,9 +155,9 @@ void Enemy::CollisionCooltime()
 	}
 }
 
-void Enemy::OnCollisioin()
+void Enemy2::OnCollisioin()
 {
-	
+
 	//hpが0より上の時
 	if (hp > 0) {
 		if (collisionCoolTime <= 0) {
@@ -221,45 +170,37 @@ void Enemy::OnCollisioin()
 }
 
 #pragma region フェーズ
-void Enemy::phase_Approach()
+void Enemy2::phase_OverTake()
 {
-	speed = { 0,0,-0.001f };
-	//移動（ベクトルを加算）
-	worldTransform_.translation_ += speed;
+	//プレイヤーを追い越す
+	Vector3 speed = { 0,0,0.2f };
 
-	//発射タイマーカウントダウン
-	shotCoolTime--;
-	//指定時間に達した
-	if (shotCoolTime <= 0) {
-		Shot();
-		//発射タイマーの初期化
-		shotCoolTime = kFireInterval;
-	}
-	//デスフラグの立った球を削除
-	bullets_.remove_if([](std::unique_ptr<EnemyBullet>& bullet) {
-		return bullet->IsDead();
-		});
+	worldTransform_.AddPosition(speed);
 
 	//既定の位置に到達したら離脱
-	if (worldTransform_.translation_.z < 0.0f) {
-		phase_ = Phase::Leave;
+	if (player_->GetWorldPosition().z + 50 < worldTransform_.translation_.z) {
+		phase_ = Phase::Assault;
+		phase_AssaultIni();
 	}
 }
 
-void Enemy::phese_ApproachIni()
+void Enemy2::phase_AssaultIni()
 {
-	shotCoolTime = kFireInterval;
+	AssaultVec = player_->GetWorldPosition() - worldTransform_.translation_;
+	//プレイヤーに突撃する
+	float speed = 0.2f;
+
+	AssaultVec.normalize();
+	AssaultVec *= speed;
 }
 
-void Enemy::phase_Leave()
+void Enemy2::phase_Assault()
 {
-	speed = { 0.3f,0,0 };
-	//移動（ベクトルを加算）
-	worldTransform_.translation_ -= speed;
+	worldTransform_.AddPosition(AssaultVec);
 }
 
-void (Enemy::* Enemy::spFuncTable[])() = {
-	&Enemy::phase_Approach,
-	&Enemy::phase_Leave
+void (Enemy2::* Enemy2::spFuncTable[])() = {
+	&Enemy2::phase_OverTake,
+	&Enemy2::phase_Assault
 };
 #pragma endregion

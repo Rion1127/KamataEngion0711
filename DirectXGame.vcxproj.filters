@@ -67,6 +67,12 @@
     <Filter Include="ヘッダー ファイル\Enemy\Enemy1">
       <UniqueIdentifier>{330e4ae0-32ac-44e2-8dd9-ee70a670dadb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\Enemy\Enemy2">
+      <UniqueIdentifier>{e8cbac83-2b40-4318-bfe2-e3c99e0a70e7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ヘッダー ファイル\Enemy\Enemy2">
+      <UniqueIdentifier>{22799a07-e0cd-4b20-9274-7659a914a1a7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -122,6 +128,12 @@
     </ClCompile>
     <ClCompile Include="EnemyBullet.cpp">
       <Filter>ソース ファイル\Enemy\Enemy1</Filter>
+    </ClCompile>
+    <ClCompile Include="Enemy2.cpp">
+      <Filter>ソース ファイル\Enemy\Enemy2</Filter>
+    </ClCompile>
+    <ClCompile Include="Particle.cpp">
+      <Filter>ソース ファイル\Player</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -229,6 +241,12 @@
     </ClInclude>
     <ClInclude Include="EnemyBullet.h">
       <Filter>ヘッダー ファイル\Enemy\Enemy1</Filter>
+    </ClInclude>
+    <ClInclude Include="Particle.h">
+      <Filter>ヘッダー ファイル\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="Enemy2.h">
+      <Filter>ヘッダー ファイル\Enemy\Enemy2</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

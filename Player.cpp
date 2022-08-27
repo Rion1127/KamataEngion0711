@@ -1,5 +1,6 @@
 #include "MathUtility.h"
 #include "WinApp.h"
+#include <random>
 #include "Player.h"
 
 Player::~Player()
@@ -34,7 +35,7 @@ void Player::Initialize(Model* model, uint32_t textureHandle)
 	cooltime = 10;
 
 	collisionCoolTime = maxCollisionCoolTime;
-
+	//照準の初期化
 	reticlePosition.Initialize();
 	ReticleModel = Model::Create();
 	matrix.ScaleChange(reticlePosition, 1, 1, 1, 1);
@@ -49,10 +50,20 @@ void Player::Initialize(Model* model, uint32_t textureHandle)
 
 	uint32_t hpBarTexture = TextureManager::Load("hpBar2.png");
 	Vector2 hpPos = {
-		WinApp::kWindowWidth /2 + 450,
-		WinApp::kWindowWidth /2 - 70};
+		WinApp::kWindowWidth / 2 + 450,
+		WinApp::kWindowWidth / 2 - 70 };
 	Vector2 hpBarMid = { 0.5f,0.5f };
 	sprite2HpBar.reset(Sprite::Create(hpBarTexture, hpPos, Vector4(1, 1, 1, 1), hpBarMid));
+
+	/*engineParticleTF.Initialize();
+	engineParticleTF.parent_ = &worldTransform_;
+	matrix.ScaleChange(engineParticleTF,1, 1, 1,1);
+	matrix.RotaChange(engineParticleTF, 0, 0, 0);
+	matrix.ChangeTranslation(engineParticleTF, 0, 0, -5);
+	matrix.UpdateMatrix(engineParticleTF);*/
+	//particleModel = Model::Create();
+
+	
 }
 
 void Player::Update()
@@ -66,8 +77,30 @@ void Player::Update()
 		bullet->Update();
 	}
 
+
+
 	//行列更新
 	matrix.UpdateMatrix(worldTransform_);
+
+	for (std::unique_ptr<Particle>& particle_ : particle_) {
+		particle_->Update();
+	}
+
+	//パーティクル生成、初期化
+
+	if (particle_.size() < 200) {
+		std::unique_ptr<Particle> newParticle = std::make_unique<Particle>();
+		newParticle->Ini(worldTransform_);
+
+		// 弾を登録
+		particle_.push_back(std::move(newParticle));
+	}
+	particleCooltime = maxCollisionCoolTime;
+
+	//デスフラグの立った球を削除
+	particle_.remove_if([](std::unique_ptr<Particle>& particle) {
+		return particle->GetDead();
+		});
 }
 
 Vector3 Player::GetWorldPosition()
@@ -89,6 +122,12 @@ void Player::Draw(ViewProjection viewProjection_)
 	//弾描画
 	for (std::unique_ptr<PlayerBullet>& bullet : bullets_) {
 		bullet->Draw(viewProjection_);
+	}
+
+	//弾描画
+	for (std::unique_ptr<Particle>& particle_ : particle_) {
+		particle_->Draw(viewProjection_);
+
 	}
 
 	//ReticleModel->Draw(reticlePosition, viewProjection_);
@@ -146,7 +185,7 @@ void Player::Get2DReticlePosition(ViewProjection viewProjection)
 	const float kDistance = 10.0f;
 	Vector3 offset = { 0,0,1.0f };
 	offset = /*MathUtility::*/Vector3toTransform(offset, worldTransform_.matWorld_);
-	offset = offset.normalize() * kDistance ;
+	offset = offset.normalize() * kDistance;
 	reticlePosition.translation_ = worldTransform_.GetWorldPosition() + offset;
 	matrix.UpdateMatrix(reticlePosition);
 
@@ -169,7 +208,7 @@ void Player::Get2DReticlePosition(ViewProjection viewProjection)
 		0 , 0 , 1 , 0 ,
 		w - reticlePosition.GetWorldPosition().x  , h + reticlePosition.GetWorldPosition().y  , 0 , 1
 	};
-	
+
 	/*reticle2DPosition = MathUtility::Vector3Transform(reticle2DPosition, viewProjection.matView);
 	reticle2DPosition = MathUtility::Vector3Transform(reticle2DPosition, viewProjection.matProjection);
 	reticle2DPosition = MathUtility::Vector3Transform(reticle2DPosition, matViewport);*/
@@ -180,7 +219,7 @@ void Player::Get2DReticlePosition(ViewProjection viewProjection)
 	vec4Reti2Dpos = W(vec4Reti2Dpos);
 
 	/*Vector4 vec = { -2,2,0,1 };
-	
+
 	Matrix4 mat1 = {
 		1,0,0,0,
 		0,1,0,0,
@@ -447,3 +486,5 @@ void Player::Attack()
 		return bullet->IsDead();
 		});
 }
+
+

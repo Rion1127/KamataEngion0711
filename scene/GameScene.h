@@ -17,6 +17,7 @@
 
 #include "Player.h"
 #include "Enemy.h"
+#include "Enemy2.h"
 #include "SkyDome.h"
 #include "RailCamera.h"
 
@@ -52,6 +53,7 @@ class GameScene {
 	void Draw();
 
 	void CheckAllCollision(Player* player,Enemy* enemy);
+	void CheckAllCollision(Player* player, Enemy2* enemy);
 
   private: // メンバ変数
 	DirectXCommon* dxCommon_ = nullptr;
@@ -74,6 +76,11 @@ class GameScene {
 	std::list<std::unique_ptr<Enemy>> enemys_;
 	//敵発生コマンド
 	std::stringstream enemyPopCommands;
+	//敵2
+	Enemy2* enemy2_ = nullptr;
+	std::list<std::unique_ptr<Enemy2>> enemys2_;
+	uint32_t enemy2TextureHandle_;
+
 	//待機中フラグ
 	bool isWait = false;
 	//待機タイマー

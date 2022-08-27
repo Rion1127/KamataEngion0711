@@ -6,6 +6,7 @@
 #include "Input.h"
 #include "Debugtext.h"
 #include "PlayerBullet.h"
+#include "Particle.h"
 #include <memory>
 #include <list>
 
@@ -93,5 +94,15 @@ private:
 	//2Dレティクル用スプライト
 	std::unique_ptr <Sprite> sprite2Dreticle;
 	std::unique_ptr <Sprite> sprite2HpBar;
+
+	
+	//弾
+	std::list<std::unique_ptr<Particle>> particle_;
+	const int MaxParticleCoolTime = 2;
+	int particleCooltime = MaxParticleCoolTime;
+	
+	
+
+
 };
 

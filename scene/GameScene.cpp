@@ -20,6 +20,7 @@ GameScene::~GameScene()
 	delete player_;
 	delete EnemyModel;
 	delete enemy_;
+	delete enemy2_;
 	delete modelSkyDome;
 	delete skyDome;
 	delete blueOrangeObj;
@@ -36,6 +37,7 @@ void GameScene::Initialize() {
 	//ファイル名を指定してテクスチャを読み込む
 	textureHandle_ = TextureManager::Load("mario.jpg");
 	enemyTextureHandle_ = TextureManager::Load("enemy.jpg");
+	enemy2TextureHandle_ = TextureManager::Load("enemy2.jpg");
 	//3Dモデルの生成
 	model_ = Model::Create();
 	EnemyModel = Model::Create();
@@ -94,6 +96,10 @@ void GameScene::Initialize() {
 	enemy_ = new Enemy();
 	enemy_->Initialize(EnemyModel, enemyTextureHandle_);
 	enemy_->SetPlayer(player_);
+
+	enemy2_ = new Enemy2();
+	enemy2_->Initialize(EnemyModel, enemy2TextureHandle_);
+	enemy2_->SetPlayer(player_);
 
 	for (std::unique_ptr<Enemy>& enemy : enemys_) {
 		enemy->Initialize(EnemyModel, enemyTextureHandle_);
@@ -155,9 +161,16 @@ void GameScene::Update()
 	if (enemy_) {
 		enemy_->Update();
 	}
+	if (enemy2_) {
+		enemy2_->Update();
+	}
 
 	//弾更新
 	for (std::unique_ptr<Enemy>& enemy : enemys_) {
+		enemy->Update();
+		CheckAllCollision(player_, enemy.get());
+	}
+	for (std::unique_ptr<Enemy2>& enemy : enemys2_) {
 		enemy->Update();
 		CheckAllCollision(player_, enemy.get());
 	}
@@ -166,6 +179,7 @@ void GameScene::Update()
 	UpdateEnemyPopCommands();
 
 	CheckAllCollision(player_, enemy_);
+	CheckAllCollision(player_, enemy2_);
 
 
 	//デバッグ表示
@@ -214,9 +228,13 @@ void GameScene::Draw() {
 	player_->Draw(useViewProjevtion);
 	
 	enemy_->Draw(useViewProjevtion);
+	enemy2_->Draw(useViewProjevtion);
 
 	//弾描画
 	for (std::unique_ptr<Enemy>& enemy : enemys_) {
+		enemy->Draw(useViewProjevtion);
+	}
+	for (std::unique_ptr<Enemy2>& enemy : enemys2_) {
 		enemy->Draw(useViewProjevtion);
 	}
 	
@@ -306,18 +324,65 @@ void GameScene::CheckAllCollision(Player* player, Enemy* enemy)
 			}
 		}
 	}
-		
-		
-
-
 #pragma endregion
-
-#pragma region 自弾と敵弾の当たり判定
-
-#pragma endregion
-
-
 	
+}
+
+void GameScene::CheckAllCollision(Player* player, Enemy2* enemy)
+{
+	//判定対象AとBの座標
+	Vector3 posA, posB;
+
+	//自弾リストの取得
+	const std::list<std::unique_ptr<PlayerBullet>>& playerBullets = player->GetBullets();
+
+#pragma region 自キャラと敵弾の当たり判定
+	////自キャラの座標
+	//posA = player->GetWorldPosition();
+	////自キャラと敵弾すべての当たり判定
+	//for (const std::unique_ptr<EnemyBullet>& bullet : enemyBullets) {
+	//	//敵弾の座標
+	//	posB = bullet.get()->GetWorldTransform().GetWorldPosition();
+
+	//	if (BallCollision(player->GetWorldPosition(), 1.0f, posB, 1.0f)) {
+	//		//自キャラの衝突時コールバックを呼び出す
+	//		player->OnCollisioin();
+	//		//敵弾の衝突時コールバックを呼び出す
+	//		bullet->OnCollisioin();
+	//	}
+
+	//}
+
+#pragma endregion
+
+#pragma region 自弾と敵キャラの当たり判定
+	enemy->CollisionCooltime();
+	debugText_->SetPos(50, 100);
+	//自キャラと敵弾すべての当たり判定
+	for (const std::unique_ptr<PlayerBullet>& bullet : playerBullets) {
+		//敵弾の座標
+		if (enemy->GetisAlive() == true) {
+			if (RayCollision(bullet.get()->GetWorldTransform(), enemy->GetWorldTransform())) {
+				//敵キャラの衝突時コールバックを呼び出す
+				enemy->OnCollisioin();
+				//自弾の衝突時コールバックを呼び出す
+				bullet->OnCollisioin();
+			}
+		}
+	}
+#pragma endregion
+
+#pragma region 敵キャラと自キャラの当たり判定
+	posA = player->GetWorldPosition();
+	posB = enemy->GetWorldPosition();
+	if (BallCollision(posA, 1.0f, posB, 1.0f)) {
+		player->OnCollisioin();
+		
+
+	}
+
+#pragma endregion
+
 }
 
 void GameScene::LoadEnemyPopData()
@@ -373,18 +438,34 @@ void GameScene::UpdateEnemyPopCommands()
 			//z座標
 			std::getline(line_stream, word, ',');
 			float z = (float)std::atof(word.c_str());
+			//敵の種類
+			std::getline(line_stream, word, ',');
+			int enemyTipe = (int)std::atof(word.c_str());
 			
 			Vector3 pos = {
 				x + railCamera_->GetWorldTransform().translation_.x,
-				y /*+ railCamera_->GetWorldTransform().translation_.y*/,
-				z + railCamera_->GetWorldTransform().translation_.z };
-			
-			// 弾を生成し、初期化
-			std::unique_ptr<Enemy> newenemy = std::make_unique<Enemy>();
-			newenemy->Initialize(model_,enemyTextureHandle_, pos);
-			newenemy->SetPlayer(player_);
-			// 弾を登録する
-			enemys_.push_back(std::move(newenemy));
+				y ,
+				z + railCamera_->GetWorldTransform().translation_.z
+			};
+
+			if (enemyTipe == 0) {
+				// 敵を生成し、初期化
+				std::unique_ptr<Enemy> newenemy = std::make_unique<Enemy>();
+				newenemy->Initialize(model_, enemyTextureHandle_, pos);
+				newenemy->SetPlayer(player_);
+				// 敵を登録する
+				enemys_.push_back(std::move(newenemy));
+			}
+			else if (enemyTipe == 1) {
+				// 敵を生成し、初期化
+				//1の敵の場合ｚ座標を指定する
+				pos.z = railCamera_->GetWorldTransform().translation_.z - 20;
+				std::unique_ptr<Enemy2> newenemy = std::make_unique<Enemy2>();
+				newenemy->Initialize(model_, enemy2TextureHandle_, pos);
+				newenemy->SetPlayer(player_);
+				// 敵を登録する
+				enemys2_.push_back(std::move(newenemy));
+			}
 		}
 		else if (word.find("WAIT") == 0) {
 			std::getline(line_stream, word, ',');
