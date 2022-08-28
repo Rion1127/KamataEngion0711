@@ -24,6 +24,7 @@ GameScene::~GameScene()
 	delete modelSkyDome;
 	delete skyDome;
 	delete blueOrangeObj;
+	delete boxObj;
 	delete railCamera_;
 }
 
@@ -112,9 +113,9 @@ void GameScene::Initialize() {
 	skyDome = new SkyDome();
 	modelSkyDome = Model::CreateFromOBJ("skydome", true);
 	skyDome->Ini(modelSkyDome);
-	
 
-	
+
+
 
 
 	/*for (int i = 0; i < 100; i++) {
@@ -134,12 +135,14 @@ void GameScene::Initialize() {
 			t += 0.01f;
 		}
 		//次の制御点に移動する
-		startIndex+=1;
+		startIndex += 1;
 		//リセット
 		t = 0;
 	}
 
 	blueOrangeObj = Model::CreateFromOBJ("testObj", true);
+	boxObj = Model::Create();
+	boxObjTextureHandle = TextureManager::Load("boxObj\\boxObj1.png");
 	LoadObjData();
 	IniObjData();
 }
@@ -165,15 +168,24 @@ void GameScene::Update()
 		enemy2_->Update();
 	}
 
-	//弾更新
+	//敵更新
 	for (std::unique_ptr<Enemy>& enemy : enemys_) {
-		enemy->Update();
 		CheckAllCollision(player_, enemy.get());
+		enemy->Update();
 	}
+	//デスフラグの立った敵を削除
+	enemys_.remove_if([](std::unique_ptr<Enemy>& enemys_) {
+		return enemys_->IsDead();
+		});
+	//敵２更新
 	for (std::unique_ptr<Enemy2>& enemy : enemys2_) {
-		enemy->Update();
 		CheckAllCollision(player_, enemy.get());
+		enemy->Update();
 	}
+	//デスフラグの立った敵を削除
+	enemys2_.remove_if([](std::unique_ptr<Enemy2>& enemys_) {
+		return enemys_->IsDead();
+		});
 
 	LoadEnemyPopData();
 	UpdateEnemyPopCommands();
@@ -226,7 +238,7 @@ void GameScene::Draw() {
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
 	player_->Draw(useViewProjevtion);
-	
+
 	enemy_->Draw(useViewProjevtion);
 	enemy2_->Draw(useViewProjevtion);
 
@@ -237,12 +249,15 @@ void GameScene::Draw() {
 	for (std::unique_ptr<Enemy2>& enemy : enemys2_) {
 		enemy->Draw(useViewProjevtion);
 	}
-	
+
 
 	skyDome->Draw(viewProjection_);
 	//水色とオレンジのオブジェクト
 	for (std::unique_ptr<WorldTransform>& worldTransform : objWorldTransforms_) {
 		blueOrangeObj->Draw(*worldTransform.get(), useViewProjevtion);
+	}
+	for (std::unique_ptr<WorldTransform>& worldTransform : obj2WorldTransforms_) {
+		boxObj->Draw(*worldTransform.get(), useViewProjevtion, boxObjTextureHandle);
 	}
 	//レールカメラの通る線を引く
 	//railCamera_->DrawRail();
@@ -298,7 +313,7 @@ void GameScene::CheckAllCollision(Player* player, Enemy* enemy)
 		//敵弾の座標
 		posB = bullet.get()->GetWorldTransform().GetWorldPosition();
 
-		if (BallCollision(player->GetWorldPosition(),1.0f, posB,1.0f)) {
+		if (BallCollision(player->GetWorldPosition(), 1.0f, posB, 1.0f)) {
 			//自キャラの衝突時コールバックを呼び出す
 			player->OnCollisioin();
 			//敵弾の衝突時コールバックを呼び出す
@@ -315,7 +330,7 @@ void GameScene::CheckAllCollision(Player* player, Enemy* enemy)
 	//自キャラと敵弾すべての当たり判定
 	for (const std::unique_ptr<PlayerBullet>& bullet : playerBullets) {
 		//敵弾の座標
-		if(enemy->GetisAlive() == true){
+		if (enemy->IsAlive() == true) {
 			if (RayCollision(bullet.get()->GetWorldTransform(), enemy->GetWorldTransform())) {
 				//敵キャラの衝突時コールバックを呼び出す
 				enemy->OnCollisioin();
@@ -325,7 +340,7 @@ void GameScene::CheckAllCollision(Player* player, Enemy* enemy)
 		}
 	}
 #pragma endregion
-	
+
 }
 
 void GameScene::CheckAllCollision(Player* player, Enemy2* enemy)
@@ -361,7 +376,7 @@ void GameScene::CheckAllCollision(Player* player, Enemy2* enemy)
 	//自キャラと敵弾すべての当たり判定
 	for (const std::unique_ptr<PlayerBullet>& bullet : playerBullets) {
 		//敵弾の座標
-		if (enemy->GetisAlive() == true) {
+		if (enemy->IsAlive() == true) {
 			if (RayCollision(bullet.get()->GetWorldTransform(), enemy->GetWorldTransform())) {
 				//敵キャラの衝突時コールバックを呼び出す
 				enemy->OnCollisioin();
@@ -377,7 +392,7 @@ void GameScene::CheckAllCollision(Player* player, Enemy2* enemy)
 	posB = enemy->GetWorldPosition();
 	if (BallCollision(posA, 1.0f, posB, 1.0f)) {
 		player->OnCollisioin();
-		
+
 
 	}
 
@@ -415,7 +430,7 @@ void GameScene::UpdateEnemyPopCommands()
 	//1行分の文字列を入れる変数
 	std::string line;
 	//コマンド実行ループ
-	while(std::getline(enemyPopCommands,line)) {
+	while (std::getline(enemyPopCommands, line)) {
 		//1行分の文字列をストリームに変換して解析しやすくする
 		std::istringstream line_stream(line);
 
@@ -441,7 +456,7 @@ void GameScene::UpdateEnemyPopCommands()
 			//敵の種類
 			std::getline(line_stream, word, ',');
 			int enemyTipe = (int)std::atof(word.c_str());
-			
+
 			Vector3 pos = {
 				x + railCamera_->GetWorldTransform().translation_.x,
 				y ,
@@ -502,6 +517,7 @@ void GameScene::IniObjData()
 	Vector3 pos{};
 	Vector3 rot{};
 	Vector3 scale{};
+	int type = 0;
 
 	//1行分の文字列を入れる変数
 	std::string line;
@@ -573,15 +589,31 @@ void GameScene::IniObjData()
 			//スケールを代入
 			scale = { x,y,z };
 		}
-
-		// 弾を生成し、初期化
+		std::getline(line_stream, word, ',');
+		if (word.find("TYPE") == 0) {
+			//オブジェクトのタイプを判別
+			std::getline(line_stream, word, ',');
+			type = (int)std::atof(word.c_str());
+		}
+		// オブジェを生成し、初期化
 		std::unique_ptr<WorldTransform> newObj = std::make_unique<WorldTransform>();
 		newObj.get()->translation_ = pos;
 		newObj.get()->rotation_ = rot;
 		newObj.get()->scale_ = scale;
-		objWorldTransforms_.push_back(std::move(newObj));
+
+		if (type == 0) {
+			objWorldTransforms_.push_back(std::move(newObj));
+		}
+		else if (type == 1) {
+			obj2WorldTransforms_.push_back(std::move(newObj));
+		}
 	}
 	for (std::unique_ptr<WorldTransform>& worldTransform : objWorldTransforms_) {
+		worldTransform.get()->Initialize();
+		assert(worldTransform.get());
+		matrix.UpdateMatrix(*worldTransform.get());
+	}
+	for (std::unique_ptr<WorldTransform>& worldTransform : obj2WorldTransforms_) {
 		worldTransform.get()->Initialize();
 		assert(worldTransform.get());
 		matrix.UpdateMatrix(*worldTransform.get());
@@ -606,7 +638,7 @@ bool BallCollision(WorldTransform a, WorldTransform b) {
 	return false;
 }
 
-bool BallCollision(Vector3 a,float aSize, Vector3 b,float bSize) {
+bool BallCollision(Vector3 a, float aSize, Vector3 b, float bSize) {
 	float x, y, z;
 	float r;
 

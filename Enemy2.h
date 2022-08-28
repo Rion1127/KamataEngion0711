@@ -19,7 +19,8 @@ public:
 	void Update();
 
 
-	bool GetisAlive() { return isAlive; }
+	bool IsDead() { return isDead; }
+	bool IsAlive() { return  isAlive; }
 	Vector3 GetWorldPosition();
 	WorldTransform GetWorldTransform() { return worldTransform_; }
 	void SetPlayer(Player* player) { player_ = player; }
@@ -42,6 +43,7 @@ private:
 
 	//HP
 	bool isAlive = true;
+	bool isDead = false;
 	const int maxHp = 3;
 	int hp = maxHp;
 	bool isCollision = false;

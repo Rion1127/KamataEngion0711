@@ -93,6 +93,14 @@ void Enemy2::Update()
 		matrix.UpdateMatrix(worldTransform_);
 
 		if (hp <= 0) {
+			isDead = true;
+		}
+
+		if (player_->GetWorldPosition().z > worldTransform_.translation_.z + 50) {
+			isDead = true;
+		}
+
+		if (hp <= 0) {
 			isAlive = false;
 		}
 
@@ -157,7 +165,6 @@ void Enemy2::CollisionCooltime()
 
 void Enemy2::OnCollisioin()
 {
-
 	//hp‚ª0‚æ‚èã‚Ì
 	if (hp > 0) {
 		if (collisionCoolTime <= 0) {
@@ -187,6 +194,7 @@ void Enemy2::phase_OverTake()
 void Enemy2::phase_AssaultIni()
 {
 	AssaultVec = player_->GetWorldPosition() - worldTransform_.translation_;
+	AssaultVec.z = AssaultVec.z + 15.0f;
 	//ƒvƒŒƒCƒ„[‚É“ËŒ‚‚·‚é
 	float speed = 0.2f;
 

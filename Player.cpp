@@ -345,12 +345,12 @@ void Player::Move()
 
 	//ˆÚ“®ŒÀŠEÀ•W
 	const float moveLimitX = 10;
-	const float moveLimitY = 8;
+	const float moveLimitY = 4;
 	//”ÍˆÍ‚ğ’´‚¦‚È‚¢ˆ—
 	worldTransform_.translation_.x = max(worldTransform_.translation_.x, -moveLimitX);
 	worldTransform_.translation_.x = min(worldTransform_.translation_.x, +moveLimitX);
 	worldTransform_.translation_.y = max(worldTransform_.translation_.y, -moveLimitY - 5);
-	worldTransform_.translation_.y = min(worldTransform_.translation_.y, +moveLimitY - 5);
+	worldTransform_.translation_.y = min(worldTransform_.translation_.y, +moveLimitY - 1);
 #pragma endregion
 
 #pragma region ‰ñ“]

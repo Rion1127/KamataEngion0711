@@ -150,7 +150,13 @@ class GameScene {
 	Model* modelSkyDome = nullptr;
 
 	Model* blueOrangeObj;
+	Model* boxObj;
+	//青とオレンジのオブジェクト
 	std::list<std::unique_ptr<WorldTransform>> objWorldTransforms_;
+	//箱のオブジェクト
+	std::list<std::unique_ptr<WorldTransform>> obj2WorldTransforms_;
+	uint32_t boxObjTextureHandle;
+
 	//オブジェ発生コマンド
 	std::stringstream objCommands;
 	void LoadObjData();

@@ -97,7 +97,15 @@ void Enemy::Update()
 		(this->*spFuncTable[static_cast<size_t>(phase_)])();
 
 		matrix.UpdateMatrix(worldTransform_);
+		if (bullets_.size() <= 0) {
+			if (hp <= 0) {
+				isDead = true;
+			}
 
+			if (player_->GetWorldPosition().z - 50 > worldTransform_.translation_.z) {
+				isDead = true;
+			}
+		}
 		if (hp <= 0) {
 			isAlive = false;
 		}
@@ -223,7 +231,7 @@ void Enemy::OnCollisioin()
 #pragma region フェーズ
 void Enemy::phase_Approach()
 {
-	speed = { 0,0,-0.001f };
+	speed = { 0,0,-0.005f };
 	//移動（ベクトルを加算）
 	worldTransform_.translation_ += speed;
 
