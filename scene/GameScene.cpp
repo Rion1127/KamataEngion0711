@@ -7,8 +7,8 @@
 #include <fstream>
 #define XM_PI 3.141592
 
-bool BallCollision(WorldTransform a, WorldTransform b);
-bool BallCollision(Vector3 a, float aSize, Vector3 b, float bSize);
+bool BallCollision(const WorldTransform& a, const WorldTransform& b);
+bool BallCollision(const Vector3& a, const float& aSize, const Vector3& b, const float& bSize);
 bool RayCollision(WorldTransform ray, WorldTransform obj);
 
 GameScene::GameScene() {}
@@ -19,8 +19,6 @@ GameScene::~GameScene()
 	delete debugCamera_;
 	delete player_;
 	delete EnemyModel;
-	delete enemy_;
-	delete enemy2_;
 	delete modelSkyDome;
 	delete skyDome;
 	delete blueOrangeObj;
@@ -34,6 +32,8 @@ void GameScene::Initialize() {
 	input_ = Input::GetInstance();
 	audio_ = Audio::GetInstance();
 	debugText_ = DebugText::GetInstance();
+
+	gumishipBGM = audio_->LoadWave("gumishipBGM.wav");
 
 	//ファイル名を指定してテクスチャを読み込む
 	textureHandle_ = TextureManager::Load("mario.jpg");
@@ -94,13 +94,6 @@ void GameScene::Initialize() {
 	player_->Initialize(gumiship, textureHandle_);
 	player_->SetParent(railCamera_->GetWorldTransform());
 
-	enemy_ = new Enemy();
-	enemy_->Initialize(EnemyModel, enemyTextureHandle_);
-	enemy_->SetPlayer(player_);
-
-	enemy2_ = new Enemy2();
-	enemy2_->Initialize(EnemyModel, enemy2TextureHandle_);
-	enemy2_->SetPlayer(player_);
 
 	for (std::unique_ptr<Enemy>& enemy : enemys_) {
 		enemy->Initialize(EnemyModel, enemyTextureHandle_);
@@ -149,6 +142,11 @@ void GameScene::Initialize() {
 
 void GameScene::Update()
 {
+	//BGM
+	if (audio_->IsPlaying(gumishipBGM) == false) {
+		audio_->PlayWave(gumishipBGM, true, 0.1f);
+	}
+
 	skyDome->Update();
 
 	debugCamera_->Update();
@@ -161,12 +159,7 @@ void GameScene::Update()
 	//自キャラ更新
 	player_->Update();
 	player_->Get2DReticlePosition(useViewProjevtion);
-	if (enemy_) {
-		enemy_->Update();
-	}
-	if (enemy2_) {
-		enemy2_->Update();
-	}
+	
 
 	//敵更新
 	for (std::unique_ptr<Enemy>& enemy : enemys_) {
@@ -179,7 +172,7 @@ void GameScene::Update()
 		});
 	//敵２更新
 	for (std::unique_ptr<Enemy2>& enemy : enemys2_) {
-		CheckAllCollision(player_, enemy.get());
+		//CheckAllCollision(player_, enemy);
 		enemy->Update();
 	}
 	//デスフラグの立った敵を削除
@@ -190,8 +183,7 @@ void GameScene::Update()
 	LoadEnemyPopData();
 	UpdateEnemyPopCommands();
 
-	CheckAllCollision(player_, enemy_);
-	CheckAllCollision(player_, enemy2_);
+
 
 
 	//デバッグ表示
@@ -238,9 +230,6 @@ void GameScene::Draw() {
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
 	player_->Draw(useViewProjevtion);
-
-	enemy_->Draw(useViewProjevtion);
-	enemy2_->Draw(useViewProjevtion);
 
 	//弾描画
 	for (std::unique_ptr<Enemy>& enemy : enemys_) {
@@ -311,7 +300,7 @@ void GameScene::CheckAllCollision(Player* player, Enemy* enemy)
 	//自キャラと敵弾すべての当たり判定
 	for (const std::unique_ptr<EnemyBullet>& bullet : enemyBullets) {
 		//敵弾の座標
-		posB = bullet.get()->GetWorldTransform().GetWorldPosition();
+		posB = bullet->GetWorldTransform().GetWorldPosition();
 
 		if (BallCollision(player->GetWorldPosition(), 1.0f, posB, 1.0f)) {
 			//自キャラの衝突時コールバックを呼び出す
@@ -331,7 +320,7 @@ void GameScene::CheckAllCollision(Player* player, Enemy* enemy)
 	for (const std::unique_ptr<PlayerBullet>& bullet : playerBullets) {
 		//敵弾の座標
 		if (enemy->IsAlive() == true) {
-			if (RayCollision(bullet.get()->GetWorldTransform(), enemy->GetWorldTransform())) {
+			if (RayCollision(bullet->GetWorldTransform(), enemy->GetWorldTransform())) {
 				//敵キャラの衝突時コールバックを呼び出す
 				enemy->OnCollisioin();
 				//自弾の衝突時コールバックを呼び出す
@@ -343,32 +332,13 @@ void GameScene::CheckAllCollision(Player* player, Enemy* enemy)
 
 }
 
-void GameScene::CheckAllCollision(Player* player, Enemy2* enemy)
+void GameScene::CheckAllCollision(Player* player, std::unique_ptr<Enemy2>& enemy)
 {
 	//判定対象AとBの座標
 	Vector3 posA, posB;
 
 	//自弾リストの取得
 	const std::list<std::unique_ptr<PlayerBullet>>& playerBullets = player->GetBullets();
-
-#pragma region 自キャラと敵弾の当たり判定
-	////自キャラの座標
-	//posA = player->GetWorldPosition();
-	////自キャラと敵弾すべての当たり判定
-	//for (const std::unique_ptr<EnemyBullet>& bullet : enemyBullets) {
-	//	//敵弾の座標
-	//	posB = bullet.get()->GetWorldTransform().GetWorldPosition();
-
-	//	if (BallCollision(player->GetWorldPosition(), 1.0f, posB, 1.0f)) {
-	//		//自キャラの衝突時コールバックを呼び出す
-	//		player->OnCollisioin();
-	//		//敵弾の衝突時コールバックを呼び出す
-	//		bullet->OnCollisioin();
-	//	}
-
-	//}
-
-#pragma endregion
 
 #pragma region 自弾と敵キャラの当たり判定
 	enemy->CollisionCooltime();
@@ -377,7 +347,7 @@ void GameScene::CheckAllCollision(Player* player, Enemy2* enemy)
 	for (const std::unique_ptr<PlayerBullet>& bullet : playerBullets) {
 		//敵弾の座標
 		if (enemy->IsAlive() == true) {
-			if (RayCollision(bullet.get()->GetWorldTransform(), enemy->GetWorldTransform())) {
+			if (RayCollision(bullet->GetWorldTransform(), *enemy->GetWorldTransform())) {
 				//敵キャラの衝突時コールバックを呼び出す
 				enemy->OnCollisioin();
 				//自弾の衝突時コールバックを呼び出す
@@ -388,12 +358,9 @@ void GameScene::CheckAllCollision(Player* player, Enemy2* enemy)
 #pragma endregion
 
 #pragma region 敵キャラと自キャラの当たり判定
-	posA = player->GetWorldPosition();
-	posB = enemy->GetWorldPosition();
-	if (BallCollision(posA, 1.0f, posB, 1.0f)) {
+	
+	if (BallCollision(player->GetWorldPosition(), 1.0f, enemy->GetWorldPosition(), 1.0f)) {
 		player->OnCollisioin();
-
-
 	}
 
 #pragma endregion
@@ -455,7 +422,7 @@ void GameScene::UpdateEnemyPopCommands()
 			float z = (float)std::atof(word.c_str());
 			//敵の種類
 			std::getline(line_stream, word, ',');
-			int enemyTipe = (int)std::atof(word.c_str());
+			int enemyType = (int)std::atof(word.c_str());
 
 			Vector3 pos = {
 				x + railCamera_->GetWorldTransform().translation_.x,
@@ -463,7 +430,7 @@ void GameScene::UpdateEnemyPopCommands()
 				z + railCamera_->GetWorldTransform().translation_.z
 			};
 
-			if (enemyTipe == 0) {
+			if (enemyType == 0) {
 				// 敵を生成し、初期化
 				std::unique_ptr<Enemy> newenemy = std::make_unique<Enemy>();
 				newenemy->Initialize(model_, enemyTextureHandle_, pos);
@@ -471,7 +438,7 @@ void GameScene::UpdateEnemyPopCommands()
 				// 敵を登録する
 				enemys_.push_back(std::move(newenemy));
 			}
-			else if (enemyTipe == 1) {
+			else if (enemyType == 1) {
 				// 敵を生成し、初期化
 				//1の敵の場合ｚ座標を指定する
 				pos.z = railCamera_->GetWorldTransform().translation_.z - 20;
@@ -621,7 +588,7 @@ void GameScene::IniObjData()
 }
 
 
-bool BallCollision(WorldTransform a, WorldTransform b) {
+bool BallCollision(const WorldTransform& a, const WorldTransform& b) {
 	float x, y, z;
 	float r;
 
@@ -638,7 +605,7 @@ bool BallCollision(WorldTransform a, WorldTransform b) {
 	return false;
 }
 
-bool BallCollision(Vector3 a, float aSize, Vector3 b, float bSize) {
+bool BallCollision(const Vector3& a, const float& aSize, const Vector3& b, const float& bSize) {
 	float x, y, z;
 	float r;
 

@@ -7,6 +7,7 @@
 #include "Debugtext.h"
 #include "PlayerBullet.h"
 #include "Particle.h"
+#include "Audio.h"
 #include <memory>
 #include <list>
 
@@ -49,6 +50,7 @@ private:
 	//“ü—Í
 	Input* input_ = nullptr;
 	Controller pad;
+	Audio* audio_ = nullptr;
 	
 	DebugText* debugText_ = nullptr;
 
@@ -101,7 +103,7 @@ private:
 	const int MaxParticleCoolTime = 2;
 	int particleCooltime = MaxParticleCoolTime;
 	
-	
+	uint32_t shotSE;
 
 
 };

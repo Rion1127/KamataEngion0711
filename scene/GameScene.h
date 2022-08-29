@@ -53,13 +53,17 @@ class GameScene {
 	void Draw();
 
 	void CheckAllCollision(Player* player,Enemy* enemy);
-	void CheckAllCollision(Player* player, Enemy2* enemy);
+	void CheckAllCollision(Player* player, std::unique_ptr<Enemy2>& enemy);
 
   private: // メンバ変数
 	DirectXCommon* dxCommon_ = nullptr;
 	Input* input_ = nullptr;
 	Audio* audio_ = nullptr;
 	DebugText* debugText_ = nullptr;
+
+	//BGM
+	uint32_t gumishipBGM;
+
 
 	//テクスチャハンドル
 	uint32_t textureHandle_ = 0;
@@ -72,12 +76,11 @@ class GameScene {
 	WorldTransform worldTransforms_[100];
 	Player* player_ = nullptr;
 
-	Enemy* enemy_ = nullptr;
+	//敵
 	std::list<std::unique_ptr<Enemy>> enemys_;
 	//敵発生コマンド
 	std::stringstream enemyPopCommands;
 	//敵2
-	Enemy2* enemy2_ = nullptr;
 	std::list<std::unique_ptr<Enemy2>> enemys2_;
 	uint32_t enemy2TextureHandle_;
 

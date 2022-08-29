@@ -50,8 +50,8 @@ struct WorldTransform {
 	void AddScale(float x, float y, float z);
 	void AddRotation(float x, float y, float z);
 	void AddPosition(float x, float y, float z);
-	void AddScale(Vector3 scale);
-	void AddRotation(Vector3 rot);
-	void AddPosition(Vector3 pos);
+	void AddScale(Vector3& scale);
+	void AddRotation(Vector3& rot);
+	void AddPosition(Vector3& pos);
 	Vector3 GetWorldPosition();
 };

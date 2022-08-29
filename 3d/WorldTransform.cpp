@@ -21,21 +21,21 @@ void WorldTransform::AddPosition(float x, float y, float z)
 	translation_.z += z;
 }
 
-void WorldTransform::AddScale(Vector3 scale)
+void WorldTransform::AddScale(Vector3& scale)
 {
 	scale_.x += scale.x;
 	scale_.y += scale.y;
 	scale_.z += scale.z;
 }
 
-void WorldTransform::AddRotation(Vector3 rot)
+void WorldTransform::AddRotation(Vector3& rot)
 {
 	rotation_.x += rot.x;
 	rotation_.y += rot.y;
 	rotation_.z += rot.z;
 }
 
-void WorldTransform::AddPosition(Vector3 pos)
+void WorldTransform::AddPosition(Vector3& pos)
 {
 	translation_.x += pos.x;
 	translation_.y += pos.y;

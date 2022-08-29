@@ -22,7 +22,7 @@ public:
 	bool IsDead() { return isDead; }
 	bool IsAlive() { return  isAlive; }
 	Vector3 GetWorldPosition();
-	WorldTransform GetWorldTransform() { return worldTransform_; }
+	WorldTransform* GetWorldTransform() { return worldTransform_; }
 	void SetPlayer(Player* player) { player_ = player; }
 	//•`‰æ
 	void Draw(const ViewProjection& viewProjection);
@@ -31,7 +31,7 @@ public:
 	void OnCollisioin();
 
 private:
-	WorldTransform worldTransform_;
+	WorldTransform* worldTransform_;
 	Matrix matrix;
 	Model* model_ = nullptr;
 	uint32_t textureHandle_ = 0u;

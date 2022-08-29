@@ -63,7 +63,8 @@ void Player::Initialize(Model* model, uint32_t textureHandle)
 	matrix.UpdateMatrix(engineParticleTF);*/
 	//particleModel = Model::Create();
 
-	
+	audio_ = Audio::GetInstance();
+	shotSE = audio_->LoadWave("shot.wav");
 }
 
 void Player::Update()
@@ -456,6 +457,7 @@ void Player::Attack()
 	cooltime--;
 	if (cooltime <= 0) {
 		if (input_->TriggerKey(DIK_SPACE) || pad.GetButtons(XINPUT_GAMEPAD_B)) {
+			audio_->PlayWave(shotSE);
 			Vector3 pos =
 			{ worldTransform_.matWorld_.m[3][0],
 				worldTransform_.matWorld_.m[3][1],
@@ -477,7 +479,7 @@ void Player::Attack()
 			// ’e‚ð“o˜^
 			bullets_.push_back(std::move(newBullet));
 
-			cooltime = 10;
+			cooltime = 15;
 		}
 	}
 
