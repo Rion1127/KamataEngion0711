@@ -186,4 +186,5 @@ class GameScene {
 	uint32_t selectSE;
 	uint32_t menuSE;
 	uint32_t backSE;
+	float bgmVolume;
 };

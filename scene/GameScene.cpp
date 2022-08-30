@@ -36,12 +36,13 @@ void GameScene::Initialize() {
 
 	//BGM
 	gumishipBGM = audio_->LoadWave("gumishipBGM.wav");
+	bgmVolume = 0.07f;
 	//SE
 	hitSE = audio_->LoadWave("hitSE.wav");
 
 	//メニュー
 	pauseScreenTextueHandle = TextureManager::Load("pause.png");
-	pauseScreen.reset(Sprite::Create(pauseScreenTextueHandle, Vector2(0,0), Vector4(1, 1, 1, 1), Vector2(0, 0)));
+	pauseScreen.reset(Sprite::Create(pauseScreenTextueHandle, Vector2(0, 0), Vector4(1, 1, 1, 1), Vector2(0, 0)));
 	//PAUSE　の画像
 	pauseText = TextureManager::Load("pauseText.png");
 	pauseTextSprite.reset(
@@ -176,11 +177,11 @@ void GameScene::Initialize() {
 void GameScene::Update()
 {
 	pad.Update();
+	//BGM
+	if (audio_->IsPlaying(gumishipBGM) == false) {
+		audio_->PlayWave(gumishipBGM, true, bgmVolume);
+	}
 	if (isMenu == false) {
-		//BGM
-		if (audio_->IsPlaying(gumishipBGM) == false) {
-			audio_->PlayWave(gumishipBGM, true, 0.07f);
-		}
 		//天球
 		skyDome->Update();
 
@@ -257,27 +258,29 @@ void GameScene::Update()
 			debugCamera_->GetViewProjection().eye.y,
 			debugCamera_->GetViewProjection().eye.z);*/
 		if (pad.GetTriggerButtons(XINPUT_GAMEPAD_START)) {
-			audio_->PlayWave(menuSE,false,1.0f);
+			audio_->PlayWave(menuSE, false, 1.5f);
 			isMenu = true;
+			
 		}
 	}
-	else if(isMenu) {
+	else if (isMenu) {
 		if (pad.GetTriggerButtons(XINPUT_GAMEPAD_START) ||
-			pad.GetTriggerButtons(XINPUT_GAMEPAD_A)) 
+			pad.GetTriggerButtons(XINPUT_GAMEPAD_A))
 		{
-			audio_->PlayWave(backSE, false, 1.0f);
+			audio_->PlayWave(backSE, false, 1.5f);
 			isMenu = false;
+			
 		}
 		//選択する
 		if (pad.GetTriggerButtons(XINPUT_GAMEPAD_DPAD_DOWN)) {
-			audio_->PlayWave(selectSE, false, 1.0f);
+			audio_->PlayWave(selectSE, false, 1.5f);
 			isSelect++;
 			if (isSelect > 1) {
 				isSelect = 0;
 			}
 		}
 		if (pad.GetTriggerButtons(XINPUT_GAMEPAD_DPAD_UP)) {
-			audio_->PlayWave(selectSE, false, 1.0f);
+			audio_->PlayWave(selectSE, false, 1.5f);
 			isSelect--;
 			if (isSelect < 0) {
 				isSelect = 1;
@@ -285,7 +288,7 @@ void GameScene::Update()
 		}
 		//決定
 		if (pad.GetTriggerButtons(XINPUT_GAMEPAD_B)) {
-			audio_->PlayWave(enterSE, false, 1.0f);
+			audio_->PlayWave(enterSE, false, 1.5f);
 			//続ける
 			if (isSelect == 0) {
 				isMenu = false;
@@ -294,6 +297,7 @@ void GameScene::Update()
 			else if (isSelect == 1) {
 
 			}
+			
 		}
 		//画像変更
 		if (pad.GetTriggerButtons(XINPUT_GAMEPAD_DPAD_DOWN) ||
@@ -497,7 +501,7 @@ void GameScene::CheckAllCollision(Player* player, std::unique_ptr<Enemy2>& enemy
 #pragma endregion
 
 #pragma region 敵キャラと自キャラの当たり判定
-	
+
 	if (BallCollision(player->GetWorldPosition(), 1.0f, enemy->GetWorldPosition(), 1.0f)) {
 		player->OnCollisioin();
 	}
@@ -701,7 +705,7 @@ void GameScene::IniObjData()
 			std::getline(line_stream, word, ',');
 			type = (int)std::atof(word.c_str());
 		}
-		
+
 		WorldTransform worldtransform;
 		worldtransform.translation_ = pos;
 		worldtransform.rotation_ = rot;
