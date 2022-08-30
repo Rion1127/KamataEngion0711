@@ -58,8 +58,6 @@ private:
 	//フェーズ
 	Phase phase_ = Phase::OverTake;
 
-	Vector3 speed = { 0,0,-0.1f };
-
 	void phase_OverTake();
 	void phase_AssaultIni();
 	void phase_Assault();
@@ -72,7 +70,7 @@ private:
 
 	const int maxCollisionCoolTime = 20;
 	int collisionCoolTime;
-	int num;
+	
 
 	//エフェクト
 	uint32_t effectTexture;

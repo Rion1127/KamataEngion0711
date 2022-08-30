@@ -22,7 +22,7 @@ GameScene::~GameScene()
 	delete modelSkyDome;
 	delete skyDome;
 	delete blueOrangeObj;
-	delete boxObj;
+	delete boxObject;
 	delete railCamera_;
 }
 
@@ -137,7 +137,7 @@ void GameScene::Initialize() {
 	}
 
 	blueOrangeObj = Model::CreateFromOBJ("testObj", true);
-	boxObj = Model::Create();
+	boxObject = Model::Create();
 	boxObjTextureHandle = TextureManager::Load("boxObj\\boxObj1.png");
 	LoadObjData();
 	IniObjData();
@@ -162,7 +162,6 @@ void GameScene::Update()
 	//自キャラ更新
 	player_->Update();
 	player_->Get2DReticlePosition(useViewProjevtion);
-	
 
 	//敵更新
 	for (std::unique_ptr<Enemy>& enemy : enemys_) {
@@ -186,7 +185,30 @@ void GameScene::Update()
 	LoadEnemyPopData();
 	UpdateEnemyPopCommands();
 
-
+	//オブジェ更新
+	//オブジェ更新
+	//for (int i = 0; i < objWorldTransforms_.size(); i++)
+	//{
+	//	//条件に合ったら削除
+	//	if (railCamera_->GetWorldTransform().translation_.z >
+	//		std::next(objWorldTransforms_.begin(), i)->get()->translation_.z)
+	//	{
+	//		objWorldTransforms_.remove_if([](std::unique_ptr<WorldTransform>& worldTransform) {
+	//			return true;
+	//			});
+	//	}
+	//}
+	//for (int i = 0; i < obj2WorldTransforms_.size(); i++)
+	//{
+	//	//条件に合ったら削除
+	//	if (railCamera_->GetWorldTransform().translation_.z >
+	//		std::next(obj2WorldTransforms_.begin(), i)->get()->translation_.z)
+	//	{
+	//		obj2WorldTransforms_.remove_if([](std::unique_ptr<WorldTransform>& worldTransform) {
+	//			return true;
+	//			});
+	//	}
+	//}
 
 
 	//デバッグ表示
@@ -245,12 +267,18 @@ void GameScene::Draw() {
 
 	skyDome->Draw(viewProjection_);
 	//水色とオレンジのオブジェクト
-	for (std::unique_ptr<WorldTransform>& worldTransform : objWorldTransforms_) {
-		blueOrangeObj->Draw(*worldTransform.get(), useViewProjevtion);
+	for (std::unique_ptr<BlueOrangeObject>& Obj : obj) {
+		if (player_->GetWorldPosition().z < Obj->worldTransform_.translation_.z + 10) {
+			Obj->Draw(useViewProjevtion);
+		}
 	}
-	for (std::unique_ptr<WorldTransform>& worldTransform : obj2WorldTransforms_) {
-		boxObj->Draw(*worldTransform.get(), useViewProjevtion, boxObjTextureHandle);
+	//箱のオブジェ
+	for (std::unique_ptr<BoxObject>& Obj : boxObj) {
+		if (player_->GetWorldPosition().z < Obj->worldTransform_.translation_.z + 10) {
+			Obj->Draw(useViewProjevtion, boxObjTextureHandle);
+		}
 	}
+
 	//レールカメラの通る線を引く
 	//railCamera_->DrawRail();
 
@@ -565,20 +593,26 @@ void GameScene::IniObjData()
 			std::getline(line_stream, word, ',');
 			type = (int)std::atof(word.c_str());
 		}
-		// オブジェを生成し、初期化
-		std::unique_ptr<WorldTransform> newObj = std::make_unique<WorldTransform>();
-		newObj.get()->translation_ = pos;
-		newObj.get()->rotation_ = rot;
-		newObj.get()->scale_ = scale;
+		
+		WorldTransform worldtransform;
+		worldtransform.translation_ = pos;
+		worldtransform.rotation_ = rot;
+		worldtransform.scale_ = scale;
 
 		if (type == 0) {
-			objWorldTransforms_.push_back(std::move(newObj));
+			// オブジェを生成し、初期化
+			std::unique_ptr<BlueOrangeObject> newObj = std::make_unique<BlueOrangeObject>();
+			newObj->Ini(blueOrangeObj, worldtransform);
+			obj.push_back(std::move(newObj));
 		}
 		else if (type == 1) {
-			obj2WorldTransforms_.push_back(std::move(newObj));
+			// オブジェを生成し、初期化
+			std::unique_ptr<BoxObject> newObj = std::make_unique<BoxObject>();
+			newObj->Ini(boxObject, worldtransform);
+			boxObj.push_back(std::move(newObj));
 		}
 	}
-	for (std::unique_ptr<WorldTransform>& worldTransform : objWorldTransforms_) {
+	/*for (std::unique_ptr<WorldTransform>& worldTransform : objWorldTransforms_) {
 		worldTransform.get()->Initialize();
 		assert(worldTransform.get());
 		matrix.UpdateMatrix(*worldTransform.get());
@@ -587,7 +621,7 @@ void GameScene::IniObjData()
 		worldTransform.get()->Initialize();
 		assert(worldTransform.get());
 		matrix.UpdateMatrix(*worldTransform.get());
-	}
+	}*/
 }
 
 

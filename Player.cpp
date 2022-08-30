@@ -17,6 +17,7 @@ void Player::Initialize(Model* model, uint32_t textureHandle)
 	//ファイル名を指定してテクスチャを読み込む
 	textureHandle_ = textureHandle;
 	model_ = model;
+	bulletModel = Model::Create();
 
 	//シングルトンインスタンスを取得する
 	input_ = Input::GetInstance();
@@ -31,7 +32,6 @@ void Player::Initialize(Model* model, uint32_t textureHandle)
 
 	pad.Ini();
 
-	bulletModel = Model::Create();
 	cooltime = 10;
 
 	collisionCoolTime = maxCollisionCoolTime;
@@ -158,8 +158,8 @@ void Player::Draw(ViewProjection viewProjection_)
 
 void Player::DrawUI()
 {
-	sprite2Dreticle.get()->Draw();
-	sprite2HpBar.get()->Draw();
+	sprite2Dreticle->Draw();
+	sprite2HpBar->Draw();
 }
 
 void Player::CollisionCooltime()
@@ -262,7 +262,7 @@ void Player::Get2DReticlePosition(ViewProjection viewProjection)
 	//
 	//reticle2DPosition = /*MathUtility::Vector3TransformCoord*/ConvertWorldToScreen(reticle2DPosition, matViewProjectionViewPort);
 	//スプライトのレティクルに座標設定
-	sprite2Dreticle.get()->SetPosition(Vector2(vec4Reti2Dpos.x, vec4Reti2Dpos.y));
+	sprite2Dreticle->SetPosition(Vector2(vec4Reti2Dpos.x, vec4Reti2Dpos.y));
 	////デバッグ表示
 	//debugText_->SetPos(50, 450);
 	//debugText_->Printf(

@@ -20,6 +20,8 @@
 #include "Enemy2.h"
 #include "SkyDome.h"
 #include "RailCamera.h"
+#include "Object.h"
+
 
 /// <summary>
 /// ゲームシーン
@@ -155,11 +157,11 @@ class GameScene {
 	Model* modelSkyDome = nullptr;
 
 	Model* blueOrangeObj;
-	Model* boxObj;
+	Model* boxObject;
 	//青とオレンジのオブジェクト
-	std::list<std::unique_ptr<WorldTransform>> objWorldTransforms_;
+	std::list<std::unique_ptr<BlueOrangeObject>> obj;
 	//箱のオブジェクト
-	std::list<std::unique_ptr<WorldTransform>> obj2WorldTransforms_;
+	std::list<std::unique_ptr<BoxObject>> boxObj;
 	uint32_t boxObjTextureHandle;
 
 	//オブジェ発生コマンド

@@ -47,9 +47,7 @@ void Enemy2::Initialize(Model* model, uint32_t textureHandle)
 	matrix.UpdateMatrix(effectWorldTransform_);
 	effectAliveTime = 5;
 
-
 	collisionCoolTime = maxCollisionCoolTime;
-	num = 0;
 }
 
 void Enemy2::Initialize(Model* model, uint32_t textureHandle, Vector3 pos)
@@ -81,7 +79,6 @@ void Enemy2::Initialize(Model* model, uint32_t textureHandle, Vector3 pos)
 
 
 	collisionCoolTime = maxCollisionCoolTime;
-	num = 0;
 	audio_ = Audio::GetInstance();
 	
 }
@@ -105,14 +102,11 @@ void Enemy2::Update()
 
 		if (isCollision == true) {
 			//エフェクトの出現座標を更新
-			matrix.RotaChange(effectWorldTransform_, worldTransform_);
 			matrix.ChangeTranslation(effectWorldTransform_, worldTransform_);
 			matrix.UpdateMatrix(effectWorldTransform_);
 		}
 	}
 }
-
-
 
 Vector3 Enemy2::GetWorldPosition()
 {
@@ -165,7 +159,6 @@ void Enemy2::OnCollisioin(uint32_t hitSE)
 	if (hp > 0) {
 		if (collisionCoolTime <= 0) {
 			audio_->PlayWave(hitSE, false, 1.0f);
-			num++;
 			hp--;
 			isCollision = true;
 			collisionCoolTime = maxCollisionCoolTime;
@@ -201,7 +194,7 @@ void Enemy2::phase_AssaultIni()
 
 void Enemy2::phase_Assault()
 {
-	worldTransform_.AddPosition(AssaultVec);
+	worldTransform_.translation_ += AssaultVec;
 }
 
 void (Enemy2::* Enemy2::spFuncTable[])() = {
