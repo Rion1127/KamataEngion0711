@@ -65,6 +65,11 @@ void GameScene::Initialize() {
 			Vector2(WinApp::kWindowWidth / 2, WinApp::kWindowHeight / 1.5f),
 			Vector4(1, 1, 1, 1),
 			Vector2(0.5f, 0.5f)));
+	//メニューES
+	enterSE = audio_->LoadWave("enterSE.wav");
+	selectSE = audio_->LoadWave("selectSE.wav");
+	menuSE = audio_->LoadWave("menuSE.wav");
+	backSE = audio_->LoadWave("backSE.wav");
 
 	//ファイル名を指定してテクスチャを読み込む
 	textureHandle_ = TextureManager::Load("mario.jpg");
@@ -252,6 +257,7 @@ void GameScene::Update()
 			debugCamera_->GetViewProjection().eye.y,
 			debugCamera_->GetViewProjection().eye.z);*/
 		if (pad.GetTriggerButtons(XINPUT_GAMEPAD_START)) {
+			audio_->PlayWave(menuSE,false,1.0f);
 			isMenu = true;
 		}
 	}
@@ -259,16 +265,19 @@ void GameScene::Update()
 		if (pad.GetTriggerButtons(XINPUT_GAMEPAD_START) ||
 			pad.GetTriggerButtons(XINPUT_GAMEPAD_A)) 
 		{
+			audio_->PlayWave(backSE, false, 1.0f);
 			isMenu = false;
 		}
 		//選択する
 		if (pad.GetTriggerButtons(XINPUT_GAMEPAD_DPAD_DOWN)) {
+			audio_->PlayWave(selectSE, false, 1.0f);
 			isSelect++;
 			if (isSelect > 1) {
 				isSelect = 0;
 			}
 		}
 		if (pad.GetTriggerButtons(XINPUT_GAMEPAD_DPAD_UP)) {
+			audio_->PlayWave(selectSE, false, 1.0f);
 			isSelect--;
 			if (isSelect < 0) {
 				isSelect = 1;
@@ -276,6 +285,7 @@ void GameScene::Update()
 		}
 		//決定
 		if (pad.GetTriggerButtons(XINPUT_GAMEPAD_B)) {
+			audio_->PlayWave(enterSE, false, 1.0f);
 			//続ける
 			if (isSelect == 0) {
 				isMenu = false;

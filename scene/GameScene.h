@@ -181,4 +181,9 @@ class GameScene {
 	std::unique_ptr <Sprite> continueButtonSprite;
 	std::unique_ptr <Sprite> resetButtonSprite;
 	int isSelect;
+	//メニューサウンド
+	uint32_t enterSE;
+	uint32_t selectSE;
+	uint32_t menuSE;
+	uint32_t backSE;
 };
