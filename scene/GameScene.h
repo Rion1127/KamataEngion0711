@@ -172,6 +172,13 @@ class GameScene {
 
 	//メニュー
 	bool isMenu = false;
-	uint32_t pauseTextueHandle;
+	uint32_t pauseScreenTextueHandle;
+	uint32_t pauseText;
+	uint32_t continueButton[2];
+	uint32_t resetButton[2];
 	std::unique_ptr <Sprite> pauseScreen;
+	std::unique_ptr <Sprite> pauseTextSprite;
+	std::unique_ptr <Sprite> continueButtonSprite;
+	std::unique_ptr <Sprite> resetButtonSprite;
+	int isSelect;
 };

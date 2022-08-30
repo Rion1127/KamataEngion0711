@@ -40,8 +40,31 @@ void GameScene::Initialize() {
 	hitSE = audio_->LoadWave("hitSE.wav");
 
 	//メニュー
-	pauseTextueHandle = TextureManager::Load("pause.png");
-	pauseScreen.reset(Sprite::Create(pauseTextueHandle, Vector2(0,0), Vector4(1, 1, 1, 1), Vector2(0, 0)));
+	pauseScreenTextueHandle = TextureManager::Load("pause.png");
+	pauseScreen.reset(Sprite::Create(pauseScreenTextueHandle, Vector2(0,0), Vector4(1, 1, 1, 1), Vector2(0, 0)));
+	//PAUSE　の画像
+	pauseText = TextureManager::Load("pauseText.png");
+	pauseTextSprite.reset(
+		Sprite::Create(pauseText,
+			Vector2(WinApp::kWindowWidth / 2, WinApp::kWindowHeight / 3),
+			Vector4(1, 1, 1, 1),
+			Vector2(0.5f, 0.5f)));
+	//　続ける　の画像
+	continueButton[0] = TextureManager::Load("continue1.png");
+	continueButton[1] = TextureManager::Load("continue2.png");
+	continueButtonSprite.reset(
+		Sprite::Create(continueButton[1],
+			Vector2(WinApp::kWindowWidth / 2, WinApp::kWindowHeight / 2),
+			Vector4(1, 1, 1, 1),
+			Vector2(0.5f, 0.5f)));
+	//　リセット　の画像
+	resetButton[0] = TextureManager::Load("reset.png");
+	resetButton[1] = TextureManager::Load("reset2.png");
+	resetButtonSprite.reset(
+		Sprite::Create(resetButton[0],
+			Vector2(WinApp::kWindowWidth / 2, WinApp::kWindowHeight / 1.5f),
+			Vector4(1, 1, 1, 1),
+			Vector2(0.5f, 0.5f)));
 
 	//ファイル名を指定してテクスチャを読み込む
 	textureHandle_ = TextureManager::Load("mario.jpg");
@@ -115,10 +138,6 @@ void GameScene::Initialize() {
 	modelSkyDome = Model::CreateFromOBJ("skydome", true);
 	skyDome->Ini(modelSkyDome);
 
-
-
-
-
 	/*for (int i = 0; i < 100; i++) {
 		Vector3 pos = GetPoint(startPos, endPos, v0, v1, t);
 		worldTransforms_[i].Initialize();
@@ -127,7 +146,6 @@ void GameScene::Initialize() {
 		matrix.UpdateMatrix(worldTransforms_[i]);
 		t += 0.01f;
 	}*/
-
 
 	for (int i = 0; i < points.size() - 3; i++) {
 		for (int j = 0; j < 100; j++) {
@@ -146,6 +164,8 @@ void GameScene::Initialize() {
 	boxObjTextureHandle = TextureManager::Load("boxObj\\boxObj1.png");
 	LoadObjData();
 	IniObjData();
+
+	isSelect = 0;
 }
 
 void GameScene::Update()
@@ -236,11 +256,67 @@ void GameScene::Update()
 		}
 	}
 	else if(isMenu) {
-		if (pad.GetTriggerButtons(XINPUT_GAMEPAD_START)) {
+		if (pad.GetTriggerButtons(XINPUT_GAMEPAD_START) ||
+			pad.GetTriggerButtons(XINPUT_GAMEPAD_A)) 
+		{
 			isMenu = false;
 		}
+		//選択する
+		if (pad.GetTriggerButtons(XINPUT_GAMEPAD_DPAD_DOWN)) {
+			isSelect++;
+			if (isSelect > 1) {
+				isSelect = 0;
+			}
+		}
+		if (pad.GetTriggerButtons(XINPUT_GAMEPAD_DPAD_UP)) {
+			isSelect--;
+			if (isSelect < 0) {
+				isSelect = 1;
+			}
+		}
+		//決定
+		if (pad.GetTriggerButtons(XINPUT_GAMEPAD_B)) {
+			//続ける
+			if (isSelect == 0) {
+				isMenu = false;
+			}
+			//リセット
+			else if (isSelect == 1) {
 
-
+			}
+		}
+		//画像変更
+		if (pad.GetTriggerButtons(XINPUT_GAMEPAD_DPAD_DOWN) ||
+			pad.GetTriggerButtons(XINPUT_GAMEPAD_DPAD_UP)) {
+			if (isSelect == 0) {
+				//続ける
+				continueButtonSprite.reset(
+					Sprite::Create(continueButton[1],
+						Vector2(WinApp::kWindowWidth / 2, WinApp::kWindowHeight / 2),
+						Vector4(1, 1, 1, 1),
+						Vector2(0.5f, 0.5f)));
+				//リセット
+				resetButtonSprite.reset(
+					Sprite::Create(resetButton[0],
+						Vector2(WinApp::kWindowWidth / 2, WinApp::kWindowHeight / 1.5f),
+						Vector4(1, 1, 1, 1),
+						Vector2(0.5f, 0.5f)));
+			}
+			else if (isSelect == 1) {
+				//続ける
+				continueButtonSprite.reset(
+					Sprite::Create(continueButton[0],
+						Vector2(WinApp::kWindowWidth / 2, WinApp::kWindowHeight / 2),
+						Vector4(1, 1, 1, 1),
+						Vector2(0.5f, 0.5f)));
+				//リセット
+				resetButtonSprite.reset(
+					Sprite::Create(resetButton[1],
+						Vector2(WinApp::kWindowWidth / 2, WinApp::kWindowHeight / 1.5f),
+						Vector4(1, 1, 1, 1),
+						Vector2(0.5f, 0.5f)));
+			}
+		}
 	}
 }
 
@@ -326,7 +402,9 @@ void GameScene::Draw() {
 	//メニューを表示
 	if (isMenu) {
 		pauseScreen->Draw();
-
+		pauseTextSprite->Draw();
+		continueButtonSprite->Draw();
+		resetButtonSprite->Draw();
 	}
 	//
 	// スプライト描画後処理
