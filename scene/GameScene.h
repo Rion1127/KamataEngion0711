@@ -63,6 +63,8 @@ class GameScene {
 
 	//BGM
 	uint32_t gumishipBGM;
+	//SE
+	uint32_t hitSE;
 
 
 	//テクスチャハンドル

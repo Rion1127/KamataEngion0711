@@ -1,4 +1,5 @@
 #pragma once
+#include "Audio.h"
 #include "WorldTransform.h"
 #include "EnemyBullet.h"
 
@@ -28,7 +29,7 @@ public:
 	void Draw(const ViewProjection& viewProjection);
 
 	void CollisionCooltime();
-	void OnCollisioin();
+	void OnCollisioin(uint32_t hitSE);
 
 	//’eƒŠƒXƒg‚ðŽæ“¾
 	const std::list<std::unique_ptr<EnemyBullet>>& GetBullets() { return bullets_; }
@@ -41,6 +42,7 @@ private:
 
 	//“ü—Í
 	Input* input_ = nullptr;
+	Audio* audio_ = nullptr;
 
 	DebugText* debugText_ = nullptr;
 
@@ -87,4 +89,5 @@ private:
 	uint32_t effectTexture;
 	WorldTransform effectWorldTransform_;
 	int effectAliveTime;
+	uint32_t hitSE;
 };

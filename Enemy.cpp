@@ -88,6 +88,8 @@ void Enemy::Initialize(Model* model, uint32_t textureHandle, Vector3 pos)
 
 	collisionCoolTime = maxCollisionCoolTime;
 	num = 0;
+	audio_ = Audio::GetInstance();
+	hitSE = audio_->LoadWave("hitSE.wav");
 }
 
 void Enemy::Update()
@@ -214,12 +216,13 @@ void Enemy::CollisionCooltime()
 	}
 }
 
-void Enemy::OnCollisioin()
+void Enemy::OnCollisioin(uint32_t hitSE)
 {
 	
 	//hp‚ª0‚æ‚èã‚ÌŽž
 	if (hp > 0) {
 		if (collisionCoolTime <= 0) {
+			audio_->PlayWave(hitSE,false,1.0f);
 			num++;
 			hp--;
 			isCollision = true;

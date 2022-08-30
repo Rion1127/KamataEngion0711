@@ -33,7 +33,10 @@ void GameScene::Initialize() {
 	audio_ = Audio::GetInstance();
 	debugText_ = DebugText::GetInstance();
 
+	//BGM
 	gumishipBGM = audio_->LoadWave("gumishipBGM.wav");
+	//SE
+	hitSE = audio_->LoadWave("hitSE.wav");
 
 	//ファイル名を指定してテクスチャを読み込む
 	textureHandle_ = TextureManager::Load("mario.jpg");
@@ -144,9 +147,9 @@ void GameScene::Update()
 {
 	//BGM
 	if (audio_->IsPlaying(gumishipBGM) == false) {
-		audio_->PlayWave(gumishipBGM, true, 0.1f);
+		audio_->PlayWave(gumishipBGM, true, 0.07f);
 	}
-
+	//天球
 	skyDome->Update();
 
 	debugCamera_->Update();
@@ -172,7 +175,7 @@ void GameScene::Update()
 		});
 	//敵２更新
 	for (std::unique_ptr<Enemy2>& enemy : enemys2_) {
-		//CheckAllCollision(player_, enemy);
+		CheckAllCollision(player_, enemy);
 		enemy->Update();
 	}
 	//デスフラグの立った敵を削除
@@ -322,7 +325,7 @@ void GameScene::CheckAllCollision(Player* player, Enemy* enemy)
 		if (enemy->IsAlive() == true) {
 			if (RayCollision(bullet->GetWorldTransform(), enemy->GetWorldTransform())) {
 				//敵キャラの衝突時コールバックを呼び出す
-				enemy->OnCollisioin();
+				enemy->OnCollisioin(hitSE);
 				//自弾の衝突時コールバックを呼び出す
 				bullet->OnCollisioin();
 			}
@@ -347,9 +350,9 @@ void GameScene::CheckAllCollision(Player* player, std::unique_ptr<Enemy2>& enemy
 	for (const std::unique_ptr<PlayerBullet>& bullet : playerBullets) {
 		//敵弾の座標
 		if (enemy->IsAlive() == true) {
-			if (RayCollision(bullet->GetWorldTransform(), *enemy->GetWorldTransform())) {
+			if (RayCollision(bullet->GetWorldTransform(), enemy->GetWorldTransform())) {
 				//敵キャラの衝突時コールバックを呼び出す
-				enemy->OnCollisioin();
+				enemy->OnCollisioin(hitSE);
 				//自弾の衝突時コールバックを呼び出す
 				bullet->OnCollisioin();
 			}
