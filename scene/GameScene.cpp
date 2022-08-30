@@ -36,7 +36,7 @@ void GameScene::Initialize() {
 
 	//BGM
 	gumishipBGM = audio_->LoadWave("gumishipBGM.wav");
-	bgmVolume = 0.07f;
+	bgmVolume = 1.0f;
 	//SE
 	hitSE = audio_->LoadWave("hitSE.wav");
 
@@ -258,18 +258,24 @@ void GameScene::Update()
 			debugCamera_->GetViewProjection().eye.y,
 			debugCamera_->GetViewProjection().eye.z);*/
 		if (pad.GetTriggerButtons(XINPUT_GAMEPAD_START)) {
+			//SE
 			audio_->PlayWave(menuSE, false, 1.5f);
+			//BGM音量調節
+			bgmVolume = 0.5f;
+			audio_->SetVolume(gumishipBGM, bgmVolume);
 			isMenu = true;
-			
 		}
 	}
 	else if (isMenu) {
+		//選択せずにゲーム画面に戻る
 		if (pad.GetTriggerButtons(XINPUT_GAMEPAD_START) ||
 			pad.GetTriggerButtons(XINPUT_GAMEPAD_A))
 		{
 			audio_->PlayWave(backSE, false, 1.5f);
+			//BGM音量調節
+			bgmVolume = 1.0f;
+			audio_->SetVolume(gumishipBGM, bgmVolume);
 			isMenu = false;
-			
 		}
 		//選択する
 		if (pad.GetTriggerButtons(XINPUT_GAMEPAD_DPAD_DOWN)) {
@@ -292,10 +298,15 @@ void GameScene::Update()
 			//続ける
 			if (isSelect == 0) {
 				isMenu = false;
+				//BGM音量調節
+				bgmVolume = 1.0f;
+				audio_->SetVolume(gumishipBGM, bgmVolume);
 			}
 			//リセット
 			else if (isSelect == 1) {
-
+				//BGM音量調節
+				bgmVolume = 1.0f;
+				audio_->SetVolume(gumishipBGM, bgmVolume);
 			}
 			
 		}
@@ -370,7 +381,7 @@ void GameScene::Draw() {
 		enemy->Draw(useViewProjevtion);
 	}
 
-
+	//天球
 	skyDome->Draw(viewProjection_);
 	//水色とオレンジのオブジェクト
 	for (std::unique_ptr<BlueOrangeObject>& Obj : obj) {
