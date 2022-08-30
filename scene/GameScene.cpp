@@ -30,6 +30,7 @@ void GameScene::Initialize() {
 
 	dxCommon_ = DirectXCommon::GetInstance();
 	input_ = Input::GetInstance();
+	pad.Ini();
 	audio_ = Audio::GetInstance();
 	debugText_ = DebugText::GetInstance();
 
@@ -37,6 +38,10 @@ void GameScene::Initialize() {
 	gumishipBGM = audio_->LoadWave("gumishipBGM.wav");
 	//SE
 	hitSE = audio_->LoadWave("hitSE.wav");
+
+	//メニュー
+	pauseTextueHandle = TextureManager::Load("pause.png");
+	pauseScreen.reset(Sprite::Create(pauseTextueHandle, Vector2(0,0), Vector4(1, 1, 1, 1), Vector2(0, 0)));
 
 	//ファイル名を指定してテクスチャを読み込む
 	textureHandle_ = TextureManager::Load("mario.jpg");
@@ -145,87 +150,98 @@ void GameScene::Initialize() {
 
 void GameScene::Update()
 {
-	//BGM
-	if (audio_->IsPlaying(gumishipBGM) == false) {
-		audio_->PlayWave(gumishipBGM, true, 0.07f);
-	}
-	//天球
-	skyDome->Update();
+	pad.Update();
+	if (isMenu == false) {
+		//BGM
+		if (audio_->IsPlaying(gumishipBGM) == false) {
+			audio_->PlayWave(gumishipBGM, true, 0.07f);
+		}
+		//天球
+		skyDome->Update();
 
-	debugCamera_->Update();
-	if (input_->TriggerKey(DIK_Q)) {
-		if (isCamera == false)isCamera = true;
-		else if (isCamera == true)isCamera = false;
-	}
+		debugCamera_->Update();
+		if (input_->TriggerKey(DIK_Q)) {
+			if (isCamera == false)isCamera = true;
+			else if (isCamera == true)isCamera = false;
+		}
 
-	railCamera_->Update();
-	//自キャラ更新
-	player_->Update();
-	player_->Get2DReticlePosition(useViewProjevtion);
+		railCamera_->Update();
+		//自キャラ更新
+		player_->Update();
+		player_->Get2DReticlePosition(useViewProjevtion);
 
-	//敵更新
-	for (std::unique_ptr<Enemy>& enemy : enemys_) {
-		CheckAllCollision(player_, enemy.get());
-		enemy->Update();
-	}
-	//デスフラグの立った敵を削除
-	enemys_.remove_if([](std::unique_ptr<Enemy>& enemys_) {
-		return enemys_->IsDead();
-		});
-	//敵２更新
-	for (std::unique_ptr<Enemy2>& enemy : enemys2_) {
-		CheckAllCollision(player_, enemy);
-		enemy->Update();
-	}
-	//デスフラグの立った敵を削除
-	enemys2_.remove_if([](std::unique_ptr<Enemy2>& enemys_) {
-		return enemys_->IsDead();
-		});
+		//敵更新
+		for (std::unique_ptr<Enemy>& enemy : enemys_) {
+			CheckAllCollision(player_, enemy.get());
+			enemy->Update();
+		}
+		//デスフラグの立った敵を削除
+		enemys_.remove_if([](std::unique_ptr<Enemy>& enemys_) {
+			return enemys_->IsDead();
+			});
+		//敵２更新
+		for (std::unique_ptr<Enemy2>& enemy : enemys2_) {
+			CheckAllCollision(player_, enemy);
+			enemy->Update();
+		}
+		//デスフラグの立った敵を削除
+		enemys2_.remove_if([](std::unique_ptr<Enemy2>& enemys_) {
+			return enemys_->IsDead();
+			});
 
-	LoadEnemyPopData();
-	UpdateEnemyPopCommands();
+		LoadEnemyPopData();
+		UpdateEnemyPopCommands();
 
-	//オブジェ更新
-	//オブジェ更新
-	//for (int i = 0; i < objWorldTransforms_.size(); i++)
-	//{
-	//	//条件に合ったら削除
-	//	if (railCamera_->GetWorldTransform().translation_.z >
-	//		std::next(objWorldTransforms_.begin(), i)->get()->translation_.z)
-	//	{
-	//		objWorldTransforms_.remove_if([](std::unique_ptr<WorldTransform>& worldTransform) {
-	//			return true;
-	//			});
-	//	}
-	//}
-	//for (int i = 0; i < obj2WorldTransforms_.size(); i++)
-	//{
-	//	//条件に合ったら削除
-	//	if (railCamera_->GetWorldTransform().translation_.z >
-	//		std::next(obj2WorldTransforms_.begin(), i)->get()->translation_.z)
-	//	{
-	//		obj2WorldTransforms_.remove_if([](std::unique_ptr<WorldTransform>& worldTransform) {
-	//			return true;
-	//			});
-	//	}
-	//}
-
-
-	//デバッグ表示
-	/*for (int i = 0; i < 5; i++) {
-		debugText_->SetPos(50, 250 + i * 20);
+		//オブジェ更新
+		//オブジェ更新
+		//for (int i = 0; i < objWorldTransforms_.size(); i++)
+		//{
+		//	//条件に合ったら削除
+		//	if (railCamera_->GetWorldTransform().translation_.z >
+		//		std::next(objWorldTransforms_.begin(), i)->get()->translation_.z)
+		//	{
+		//		objWorldTransforms_.remove_if([](std::unique_ptr<WorldTransform>& worldTransform) {
+		//			return true;
+		//			});
+		//	}
+		//}
+		//for (int i = 0; i < obj2WorldTransforms_.size(); i++)
+		//{
+		//	//条件に合ったら削除
+		//	if (railCamera_->GetWorldTransform().translation_.z >
+		//		std::next(obj2WorldTransforms_.begin(), i)->get()->translation_.z)
+		//	{
+		//		obj2WorldTransforms_.remove_if([](std::unique_ptr<WorldTransform>& worldTransform) {
+		//			return true;
+		//			});
+		//	}
+		//}
+		//デバッグ表示
+		/*for (int i = 0; i < 5; i++) {
+			debugText_->SetPos(50, 250 + i * 20);
+			debugText_->Printf(
+				"worldTransforms_:(%f,%f,%f)",
+				worldTransforms_[i].translation_.x,
+				worldTransforms_[i].translation_.y,
+				worldTransforms_[i].translation_.z);
+		}*/
+		/*debugText_->SetPos(50, 290);
 		debugText_->Printf(
-			"worldTransforms_:(%f,%f,%f)",
-			worldTransforms_[i].translation_.x,
-			worldTransforms_[i].translation_.y,
-			worldTransforms_[i].translation_.z);
-	}*/
-	/*debugText_->SetPos(50, 290);
-	debugText_->Printf(
-		"Collision:(%d)",
-		debugCamera_->GetViewProjection().eye.x,
-		debugCamera_->GetViewProjection().eye.y,
-		debugCamera_->GetViewProjection().eye.z);*/
+			"Collision:(%d)",
+			debugCamera_->GetViewProjection().eye.x,
+			debugCamera_->GetViewProjection().eye.y,
+			debugCamera_->GetViewProjection().eye.z);*/
+		if (pad.GetTriggerButtons(XINPUT_GAMEPAD_START)) {
+			isMenu = true;
+		}
+	}
+	else if(isMenu) {
+		if (pad.GetTriggerButtons(XINPUT_GAMEPAD_START)) {
+			isMenu = false;
+		}
+
+
+	}
 }
 
 void GameScene::Draw() {
@@ -268,7 +284,7 @@ void GameScene::Draw() {
 	skyDome->Draw(viewProjection_);
 	//水色とオレンジのオブジェクト
 	for (std::unique_ptr<BlueOrangeObject>& Obj : obj) {
-		if (player_->GetWorldPosition().z < Obj->worldTransform_.translation_.z + 10) {
+		if (player_->GetWorldPosition().z - 10 < Obj->worldTransform_.translation_.z) {
 			Obj->Draw(useViewProjevtion);
 		}
 	}
@@ -281,7 +297,6 @@ void GameScene::Draw() {
 
 	//レールカメラの通る線を引く
 	//railCamera_->DrawRail();
-
 	//for (int i = 0; i < 3; i++) {
 	//	for (int j = 0; j < 99; j++) {
 	//		//model_->Draw(worldTransforms_[i], useViewProjevtion);
@@ -308,6 +323,11 @@ void GameScene::Draw() {
 
 	// デバッグテキストの描画
 	debugText_->DrawAll(commandList);
+	//メニューを表示
+	if (isMenu) {
+		pauseScreen->Draw();
+
+	}
 	//
 	// スプライト描画後処理
 	Sprite::PostDraw();

@@ -60,6 +60,7 @@ class GameScene {
   private: // メンバ変数
 	DirectXCommon* dxCommon_ = nullptr;
 	Input* input_ = nullptr;
+	Controller pad;
 	Audio* audio_ = nullptr;
 	DebugText* debugText_ = nullptr;
 
@@ -168,4 +169,9 @@ class GameScene {
 	std::stringstream objCommands;
 	void LoadObjData();
 	void IniObjData();
+
+	//メニュー
+	bool isMenu = false;
+	uint32_t pauseTextueHandle;
+	std::unique_ptr <Sprite> pauseScreen;
 };
