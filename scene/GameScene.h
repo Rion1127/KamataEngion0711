@@ -21,6 +21,7 @@
 #include "SkyDome.h"
 #include "RailCamera.h"
 #include "Object.h"
+#include "Particle.h"
 
 
 /// <summary>
@@ -189,4 +190,6 @@ class GameScene {
 	uint32_t menuSE;
 	uint32_t backSE;
 	float bgmVolume;
+	//パーティクル
+	std::list<std::unique_ptr<BurstEffect>> burstparticle_;
 };

@@ -88,7 +88,7 @@ private:
 	//p1からスタートする
 	size_t startIndex = 1;
 
-	const int maxCollisionCoolTime = 20;
+	const int maxCollisionCoolTime = 40;
 	int collisionCoolTime = maxCollisionCoolTime;
 
 	//レティクル
@@ -99,13 +99,14 @@ private:
 	std::unique_ptr <Sprite> sprite2HpBar;
 
 	
-	//弾
-	std::list<std::unique_ptr<Particle>> particle_;
+	//パーティクル
+	std::list<std::unique_ptr<EngineParticle>> particle_;
 	const int MaxParticleCoolTime = 2;
 	int particleCooltime = MaxParticleCoolTime;
 	
 	uint32_t shotSE;
 
-
+	//パーティクル
+	std::list<std::unique_ptr<BurstEffect>> burstparticle_;
 };
 

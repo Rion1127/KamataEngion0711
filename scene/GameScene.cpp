@@ -200,6 +200,17 @@ void GameScene::Update()
 		for (std::unique_ptr<Enemy>& enemy : enemys_) {
 			CheckAllCollision(player_, enemy.get());
 			enemy->Update();
+			//死亡時エフェクト
+			if (enemy->IsDead() == true)
+			{
+				for (int i = 0; i < 10; i++) {
+					std::unique_ptr<BurstEffect> newburstEffect = std::make_unique<BurstEffect>();
+					newburstEffect->Ini(model_, enemy->GetWorldTransform());
+					// 弾を登録
+					burstparticle_.emplace_back(std::move(newburstEffect));
+				}
+			}
+
 		}
 		//デスフラグの立った敵を削除
 		enemys_.remove_if([](std::unique_ptr<Enemy>& enemys_) {
@@ -209,16 +220,33 @@ void GameScene::Update()
 		for (std::unique_ptr<Enemy2>& enemy : enemys2_) {
 			CheckAllCollision(player_, enemy);
 			enemy->Update();
+			//死亡時エフェクト
+			if (enemy->IsDead() == true)
+			{
+				for (int i = 0; i < 10; i++) {
+					std::unique_ptr<BurstEffect> newburstEffect = std::make_unique<BurstEffect>();
+					newburstEffect->Ini(model_, enemy->GetWorldTransform());
+					// 弾を登録
+					burstparticle_.emplace_back(std::move(newburstEffect));
+				}
+			}
 		}
 		//デスフラグの立った敵を削除
 		enemys2_.remove_if([](std::unique_ptr<Enemy2>& enemys_) {
 			return enemys_->IsDead();
 			});
 
-		if (player_->GetWorldPosition().z < 1400) {
-			LoadEnemyPopData();
-			UpdateEnemyPopCommands();
+		for (std::unique_ptr<BurstEffect>& effect : burstparticle_) {
+			effect->Update();
 		}
+		//デスフラグの立ったエフェクトを削除
+		burstparticle_.remove_if([](std::unique_ptr<BurstEffect>& effect) {
+			return effect->GetDead();
+			});
+
+		LoadEnemyPopData();
+		UpdateEnemyPopCommands();
+
 		//オブジェ更新
 		//オブジェ更新
 		//for (int i = 0; i < objWorldTransforms_.size(); i++)
@@ -258,6 +286,8 @@ void GameScene::Update()
 			debugCamera_->GetViewProjection().eye.x,
 			debugCamera_->GetViewProjection().eye.y,
 			debugCamera_->GetViewProjection().eye.z);*/
+
+		//メニューへ移る
 		if (pad.GetTriggerButtons(XINPUT_GAMEPAD_START)) {
 			//SE
 			audio_->PlayWave(menuSE, false, 1.5f);
@@ -267,6 +297,7 @@ void GameScene::Update()
 			isMenu = true;
 		}
 	}
+	//メニュー
 	else if (isMenu) {
 		//選択せずにゲーム画面に戻る
 		if (pad.GetTriggerButtons(XINPUT_GAMEPAD_START) ||
@@ -408,6 +439,9 @@ void GameScene::Draw() {
 	for (std::unique_ptr<Enemy2>& enemy : enemys2_) {
 		enemy->Draw(useViewProjevtion);
 	}
+	for (std::unique_ptr<BurstEffect>& effect : burstparticle_) {
+		effect->Draw(useViewProjevtion);
+	}
 
 	//天球
 	skyDome->Draw(viewProjection_);
@@ -481,6 +515,8 @@ void GameScene::CheckAllCollision(Player* player, Enemy* enemy)
 #pragma region 自キャラと敵弾の当たり判定
 	//自キャラの座標
 	posA = player->GetWorldPosition();
+	player->CollisionCooltime();
+	enemy->CollisionCooltime();
 	//自キャラと敵弾すべての当たり判定
 	for (const std::unique_ptr<EnemyBullet>& bullet : enemyBullets) {
 		//敵弾の座標
@@ -498,7 +534,7 @@ void GameScene::CheckAllCollision(Player* player, Enemy* enemy)
 #pragma endregion
 
 #pragma region 自弾と敵キャラの当たり判定
-	enemy->CollisionCooltime();
+
 	debugText_->SetPos(50, 100);
 	//自キャラと敵弾すべての当たり判定
 	for (const std::unique_ptr<PlayerBullet>& bullet : playerBullets) {
@@ -511,8 +547,11 @@ void GameScene::CheckAllCollision(Player* player, Enemy* enemy)
 				bullet->OnCollisioin();
 			}
 		}
+
 	}
 #pragma endregion
+
+
 
 }
 
@@ -526,6 +565,7 @@ void GameScene::CheckAllCollision(Player* player, std::unique_ptr<Enemy2>& enemy
 
 #pragma region 自弾と敵キャラの当たり判定
 	enemy->CollisionCooltime();
+	player->CollisionCooltime();
 	debugText_->SetPos(50, 100);
 	//自キャラと敵弾すべての当たり判定
 	for (const std::unique_ptr<PlayerBullet>& bullet : playerBullets) {
@@ -536,6 +576,15 @@ void GameScene::CheckAllCollision(Player* player, std::unique_ptr<Enemy2>& enemy
 				enemy->OnCollisioin(hitSE);
 				//自弾の衝突時コールバックを呼び出す
 				bullet->OnCollisioin();
+			}
+		}
+		if (enemy->IsAlive() == false)
+		{
+			for (int i = 0; i < 10; i++) {
+				std::unique_ptr<BurstEffect> newburstEffect = std::make_unique<BurstEffect>();
+				newburstEffect->Ini(model_, enemy->GetWorldTransform());
+				// 弾を登録
+				burstparticle_.emplace_back(std::move(newburstEffect));
 			}
 		}
 	}
@@ -616,7 +665,7 @@ void GameScene::UpdateEnemyPopCommands()
 				newenemy->Initialize(model_, enemyTextureHandle_, pos);
 				newenemy->SetPlayer(player_);
 				// 敵を登録する
-				enemys_.push_back(std::move(newenemy));
+				enemys_.emplace_back(std::move(newenemy));
 			}
 			else if (enemyType == 1) {
 				// 敵を生成し、初期化
@@ -626,7 +675,7 @@ void GameScene::UpdateEnemyPopCommands()
 				newenemy->Initialize(model_, enemy2TextureHandle_, pos);
 				newenemy->SetPlayer(player_);
 				// 敵を登録する
-				enemys2_.push_back(std::move(newenemy));
+				enemys2_.emplace_back(std::move(newenemy));
 			}
 		}
 		else if (word.find("WAIT") == 0) {
@@ -750,13 +799,13 @@ void GameScene::IniObjData()
 			// オブジェを生成し、初期化
 			std::unique_ptr<BlueOrangeObject> newObj = std::make_unique<BlueOrangeObject>();
 			newObj->Ini(blueOrangeObj, worldtransform);
-			obj.push_back(std::move(newObj));
+			obj.emplace_back(std::move(newObj));
 		}
 		else if (type == 1) {
 			// オブジェを生成し、初期化
 			std::unique_ptr<BoxObject> newObj = std::make_unique<BoxObject>();
 			newObj->Ini(boxObject, worldtransform);
-			boxObj.push_back(std::move(newObj));
+			boxObj.emplace_back(std::move(newObj));
 		}
 	}
 	/*for (std::unique_ptr<WorldTransform>& worldTransform : objWorldTransforms_) {

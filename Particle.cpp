@@ -4,13 +4,13 @@
 #include "Particle.h"
 
 
-
-Particle::~Particle()
+#pragma region
+EngineParticle::~EngineParticle()
 {
 	delete Model_;
 }
 
-void Particle::Ini(WorldTransform worldtransform)
+void EngineParticle::Ini( WorldTransform worldtransform)
 {
 	//テクスチャ読み込み
 	textureHandle_ = TextureManager::Load("fire.png");
@@ -18,9 +18,6 @@ void Particle::Ini(WorldTransform worldtransform)
 	worldTransform_.Initialize();
 
 	Model_ = Model::Create();
-
-	pad.Ini();
-	pad.Update();
 
 	Vector3 velocity = {0,0,-1};
 	float kBulletSpeed = 0.3f;
@@ -57,7 +54,7 @@ void Particle::Ini(WorldTransform worldtransform)
 
 }
 
-void Particle::Update()
+void EngineParticle::Update()
 {
 	
 
@@ -71,7 +68,66 @@ void Particle::Update()
 	}
 }
 
-void Particle::Draw(ViewProjection viewProjection)
+void EngineParticle::Draw(ViewProjection viewProjection)
 {
 	Model_->Draw(worldTransform_, viewProjection,textureHandle_);
+}
+#pragma endregion
+
+BurstEffect::~BurstEffect()
+{
+}
+
+void BurstEffect::Ini(Model* model ,WorldTransform worldtransform)
+{
+	//テクスチャ読み込み
+	textureHandle_ = TextureManager::Load("white.png");
+
+	worldTransform_.Initialize();
+
+	Model_ = model;
+
+	
+	matrix.ScaleChange(worldTransform_, 0.15f, 0.15f, 0.15f, 1);
+	matrix.RotaChange(worldTransform_,
+		worldTransform_.rotation_.x,
+		worldTransform_.rotation_.y,
+		worldTransform_.rotation_.z);
+	matrix.ChangeTranslation(worldTransform_,
+		worldtransform.GetWorldPosition().x,
+		worldtransform.GetWorldPosition().y,
+		worldtransform.GetWorldPosition().z);
+	matrix.UpdateMatrix(worldTransform_);
+
+
+	particleAliveTime = MaxParticleAlive;
+	isDead = false;
+
+	//乱数生成器
+	std::random_device seed_gen;
+	std::mt19937_64 engine(seed_gen());
+	//乱数範囲の指定
+	std::uniform_real_distribution<float> x(-0.05f, 0.05f);
+	std::uniform_real_distribution<float> y(-0.05f, 0.05f);
+	std::uniform_real_distribution<float> z(-0.05f, 0.05f);
+
+	velocity_ = { x(engine),y(engine),z(engine) };
+}
+
+void BurstEffect::Update()
+{
+	worldTransform_.AddRotation(velocity_);
+	worldTransform_.AddPosition(velocity_);
+	matrix.UpdateMatrix(worldTransform_);
+
+	particleAliveTime--;
+	if (particleAliveTime <= 0)
+	{
+		isDead = true;
+	}
+}
+
+void BurstEffect::Draw(ViewProjection viewProjection)
+{
+	Model_->Draw(worldTransform_, viewProjection, textureHandle_);
 }

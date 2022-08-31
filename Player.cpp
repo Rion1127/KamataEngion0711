@@ -89,23 +89,32 @@ void Player::Update()
 	//行列更新
 	matrix.UpdateMatrix(worldTransform_);
 
-	for (std::unique_ptr<Particle>& particle_ : particle_) {
+	for (std::unique_ptr<EngineParticle>& particle_ : particle_) {
+		particle_->Update();
+	}
+	//エフェクト描画
+	for (std::unique_ptr<BurstEffect>& particle_ : burstparticle_) {
 		particle_->Update();
 	}
 
 	//パーティクル生成、初期化
 
 	if (particle_.size() < 10) {
-		std::unique_ptr<Particle> newParticle = std::make_unique<Particle>();
+		std::unique_ptr<EngineParticle> newParticle = std::make_unique<EngineParticle>();
 		newParticle->Ini(worldTransform_);
 
 		// 弾を登録
-		particle_.push_back(std::move(newParticle));
+		particle_.emplace_back(std::move(newParticle));
 	}
 	particleCooltime = maxCollisionCoolTime;
 
 	//デスフラグの立った球を削除
-	particle_.remove_if([](std::unique_ptr<Particle>& particle) {
+	particle_.remove_if([](std::unique_ptr<EngineParticle>& particle) {
+		return particle->GetDead();
+		});
+
+	//デスフラグの立った球を削除
+	burstparticle_.remove_if([](std::unique_ptr<BurstEffect>& particle) {
 		return particle->GetDead();
 		});
 }
@@ -131,10 +140,15 @@ void Player::Draw(ViewProjection viewProjection_)
 		bullet->Draw(viewProjection_);
 	}
 
-	//弾描画
-	for (std::unique_ptr<Particle>& particle_ : particle_) {
+	//エフェクト描画
+	for (std::unique_ptr<EngineParticle>& particle_ : particle_) {
 		particle_->Draw(viewProjection_);
 
+	}
+
+	//エフェクト描画
+	for (std::unique_ptr<BurstEffect>& particle_ : burstparticle_) {
+		particle_->Draw(viewProjection_);
 	}
 
 	//ReticleModel->Draw(reticlePosition, viewProjection_);
@@ -175,9 +189,13 @@ void Player::CollisionCooltime()
 
 void Player::OnCollisioin()
 {
-
 	if (collisionCoolTime <= 0) {
-
+		for (int i = 0; i < 10; i++) {
+			std::unique_ptr<BurstEffect> newburstEffect = std::make_unique<BurstEffect>();
+			newburstEffect->Ini(bulletModel,worldTransform_);
+			// 弾を登録
+			burstparticle_.emplace_back(std::move(newburstEffect));
+		}
 		collisionCoolTime = maxCollisionCoolTime;
 	}
 }
@@ -268,13 +286,13 @@ void Player::Get2DReticlePosition(ViewProjection viewProjection)
 	//
 	//reticle2DPosition = /*MathUtility::Vector3TransformCoord*/ConvertWorldToScreen(reticle2DPosition, matViewProjectionViewPort);
 	//スプライトのレティクルに座標設定
-	sprite2Dreticle->SetPosition(Vector2(vec4Reti2Dpos.x, vec4Reti2Dpos.y));
 	////デバッグ表示
 	//debugText_->SetPos(50, 450);
 	//debugText_->Printf(
 	//	"vec4Reti2Dpos:(%f,%f)",
 	//	vec4Reti2Dpos.x,
 	//	vec4Reti2Dpos.y);
+	sprite2Dreticle->SetPosition(Vector2(vec4Reti2Dpos.x, vec4Reti2Dpos.y));
 }
 
 void Player::Move()
@@ -483,7 +501,7 @@ void Player::Attack()
 			newBullet->Initialize(bulletModel, pos, worldTransform_.rotation_, velocity);
 
 			// 弾を登録
-			bullets_.push_back(std::move(newBullet));
+			bullets_.emplace_back(std::move(newBullet));
 
 			cooltime = 15;
 		}
