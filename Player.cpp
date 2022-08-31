@@ -86,8 +86,6 @@ void Player::Update()
 		bullet->Update();
 	}
 
-
-
 	//行列更新
 	matrix.UpdateMatrix(worldTransform_);
 
@@ -97,7 +95,7 @@ void Player::Update()
 
 	//パーティクル生成、初期化
 
-	if (particle_.size() < 200) {
+	if (particle_.size() < 10) {
 		std::unique_ptr<Particle> newParticle = std::make_unique<Particle>();
 		newParticle->Ini(worldTransform_);
 

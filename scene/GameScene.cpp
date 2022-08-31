@@ -215,9 +215,10 @@ void GameScene::Update()
 			return enemys_->IsDead();
 			});
 
-		LoadEnemyPopData();
-		UpdateEnemyPopCommands();
-
+		if (player_->GetWorldPosition().z < 1400) {
+			LoadEnemyPopData();
+			UpdateEnemyPopCommands();
+		}
 		//オブジェ更新
 		//オブジェ更新
 		//for (int i = 0; i < objWorldTransforms_.size(); i++)
@@ -383,7 +384,7 @@ void GameScene::Draw() {
 	skyDome->Draw(viewProjection_);
 	//水色とオレンジのオブジェクト
 	for (std::unique_ptr<BlueOrangeObject>& Obj : obj) {
-		if (player_->GetWorldPosition().z - 10 < Obj->worldTransform_.translation_.z &&
+		if (player_->GetWorldPosition().z - 5 < Obj->worldTransform_.translation_.z &&
 			player_->GetWorldPosition().z + 250 > Obj->worldTransform_.translation_.z) {
 			Obj->Draw(useViewProjevtion);
 		}

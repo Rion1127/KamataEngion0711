@@ -41,7 +41,7 @@ private:
 	float timeRate = 0;
 
 	Vector3 start = { 0, 10, -25 };
-	Vector3 p2 = { 0,10,600 };
+	Vector3 p2 = { 0,10,500 };
 	Vector3 p3 = { 0,10,1000 };
 	Vector3 end = { 0,10,1400 };
 	std::vector<Vector3> points{ start,start,p2,p3,end,end };
