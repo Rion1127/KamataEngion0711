@@ -295,20 +295,18 @@ void GameScene::Update()
 		//決定
 		if (pad.GetTriggerButtons(XINPUT_GAMEPAD_B)) {
 			audio_->PlayWave(enterSE, false, 1.5f);
+			//BGM音量調節
+			bgmVolume = 1.0f;
+			audio_->SetVolume(gumishipBGM, bgmVolume);
 			//続ける
 			if (isSelect == 0) {
 				isMenu = false;
-				//BGM音量調節
-				bgmVolume = 1.0f;
-				audio_->SetVolume(gumishipBGM, bgmVolume);
 			}
 			//リセット
 			else if (isSelect == 1) {
-				//BGM音量調節
-				bgmVolume = 1.0f;
-				audio_->SetVolume(gumishipBGM, bgmVolume);
+				//リセットする
+				ResetGameScene();
 			}
-			
 		}
 		//画像変更
 		if (pad.GetTriggerButtons(XINPUT_GAMEPAD_DPAD_DOWN) ||
@@ -385,13 +383,15 @@ void GameScene::Draw() {
 	skyDome->Draw(viewProjection_);
 	//水色とオレンジのオブジェクト
 	for (std::unique_ptr<BlueOrangeObject>& Obj : obj) {
-		if (player_->GetWorldPosition().z - 10 < Obj->worldTransform_.translation_.z) {
+		if (player_->GetWorldPosition().z - 10 < Obj->worldTransform_.translation_.z &&
+			player_->GetWorldPosition().z + 250 > Obj->worldTransform_.translation_.z) {
 			Obj->Draw(useViewProjevtion);
 		}
 	}
 	//箱のオブジェ
 	for (std::unique_ptr<BoxObject>& Obj : boxObj) {
-		if (player_->GetWorldPosition().z < Obj->worldTransform_.translation_.z + 10) {
+		if (player_->GetWorldPosition().z - 10 < Obj->worldTransform_.translation_.z &&
+			player_->GetWorldPosition().z + 300 > Obj->worldTransform_.translation_.z) {
 			Obj->Draw(useViewProjevtion, boxObjTextureHandle);
 		}
 	}
@@ -527,12 +527,10 @@ void GameScene::LoadEnemyPopData()
 	std::ifstream file;
 	file.open("Resources\\enemyPop.csv");
 	assert(file.is_open());
-
 	//ファイルの内容を文字列ストリームにコピー
 	enemyPopCommands << file.rdbuf();
 	//ファイルを閉じる
 	file.close();
-
 }
 
 void GameScene::UpdateEnemyPopCommands()
@@ -546,8 +544,6 @@ void GameScene::UpdateEnemyPopCommands()
 		}
 		return;
 	}
-
-
 	//1行分の文字列を入れる変数
 	std::string line;
 	//コマンド実行ループ
@@ -614,8 +610,6 @@ void GameScene::UpdateEnemyPopCommands()
 			//コマンドループを抜ける
 			break;
 		}
-
-
 	}
 }
 
@@ -745,6 +739,53 @@ void GameScene::IniObjData()
 		assert(worldTransform.get());
 		matrix.UpdateMatrix(*worldTransform.get());
 	}*/
+}
+
+void GameScene::ResetGameScene()
+{
+	isMenu = false;
+	//プレイヤー
+	player_->Reset();
+	//敵１
+	for (std::unique_ptr<Enemy>& enemy : enemys_) {
+		enemy->SetDead();
+	}
+	//デスフラグの立った敵を削除
+	enemys_.remove_if([](std::unique_ptr<Enemy>& enemys_) {
+		return enemys_->IsDead();
+		});
+	//敵２
+	for (std::unique_ptr<Enemy2>& enemy : enemys2_) {
+		enemy->SetDead();
+	}
+	//デスフラグの立った敵を削除
+	enemys2_.remove_if([](std::unique_ptr<Enemy2>& enemys_) {
+		return enemys_->IsDead();
+		});
+	//敵出現ファイル初期化
+	//ファイルを開く
+	std::ifstream file;
+	file.open("Resources\\enemyPop.csv");
+	assert(file.is_open());
+	//ファイルの内容を文字列ストリームにコピー
+	enemyPopCommands << file.rdbuf();
+	//1行分の文字列を入れる変数
+	std::string line;
+	while (std::getline(enemyPopCommands, line)) {
+		//1行分の文字列をストリームに変換して解析しやすくする
+		std::istringstream line_stream(line);
+		if (line.find("RESET") == 0) {
+			break;
+		}
+	}
+	//ファイルを閉じる
+	file.close();
+	//待機時間をリセットする
+	waitTimer = 0;
+	isWait = false;
+
+	//レールカメラ
+	railCamera_->Reset(Vector3(0, 10, -25), Vector3(0, 0, 0));
 }
 
 

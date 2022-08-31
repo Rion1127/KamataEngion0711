@@ -21,6 +21,8 @@ public:
 
 	void Shot();
 	bool IsDead() { return isDead; }
+	//死にフラグをセットする
+	void SetDead() { isDead = true; }
 	bool IsAlive() { return  isAlive; }
 	Vector3 GetWorldPosition();
 	WorldTransform GetWorldTransform() { return worldTransform_; }

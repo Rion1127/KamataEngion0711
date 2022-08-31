@@ -17,6 +17,7 @@ public:
 	~Player();
 	//初期化
 	void Initialize(Model* model,uint32_t textureHandle);
+	void Reset();
 	//更新
 	void Update();
 	//ワールド座標を取得

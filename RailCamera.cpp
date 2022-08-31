@@ -44,6 +44,17 @@ void RailCamera::Ini(Vector3 pos, Vector3 rot)
 	startIndex = 1;
 }
 
+void RailCamera::Reset(Vector3 pos, Vector3 rot)
+{
+	//ワールドトランスフォームの初期設定
+	worldTransform.translation_ = pos;
+	worldTransform.rotation_ = rot;
+	matrix.UnitMatrix(worldTransform.matWorld_);
+
+	startIndex = 1;
+	time = 0;
+}
+
 void RailCamera::Update()
 {
 	//レールカメラの挙動

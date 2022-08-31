@@ -56,6 +56,8 @@ class GameScene {
 
 	void CheckAllCollision(Player* player,Enemy* enemy);
 	void CheckAllCollision(Player* player, std::unique_ptr<Enemy2>& enemy);
+	//メニューでリセットした時に呼び出す
+	void ResetGameScene();
 
   private: // メンバ変数
 	DirectXCommon* dxCommon_ = nullptr;

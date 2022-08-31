@@ -10,6 +10,7 @@ class RailCamera
 public:
 	~RailCamera();
 	void Ini(Vector3 pos,Vector3 rot);
+	void Reset(Vector3 pos, Vector3 rot);
 	void Update();
 
 	void Move();

@@ -67,6 +67,14 @@ void Player::Initialize(Model* model, uint32_t textureHandle)
 	shotSE = audio_->LoadWave("shot.wav");
 }
 
+void Player::Reset()
+{
+	matrix.ScaleChange(worldTransform_, 1, 1, 1, 1);
+	matrix.RotaChange(worldTransform_, 0, 0, 0);
+	matrix.ChangeTranslation(worldTransform_, 0, -10, 20);
+	matrix.UpdateMatrix(worldTransform_);
+}
+
 void Player::Update()
 {
 	pad.Update();
@@ -134,11 +142,11 @@ void Player::Draw(ViewProjection viewProjection_)
 	//ReticleModel->Draw(reticlePosition, viewProjection_);
 
 	//デバッグ表示
-	/*debugText_->SetPos(50, 150);
+	debugText_->SetPos(50, 150);
 	debugText_->Printf(
 		"player:(%f,%f,%f)", GetWorldPosition().x,
 		GetWorldPosition().y,
-		GetWorldPosition().z);*/
+		GetWorldPosition().z);
 	////デバッグ表示
 	//debugText_->SetPos(50, 170);
 	//debugText_->Printf(
