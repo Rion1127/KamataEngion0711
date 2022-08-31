@@ -308,6 +308,35 @@ void GameScene::Update()
 				//リセットする
 				ResetGameScene();
 			}
+			isSelect = 0;
+			if (isSelect == 0) {
+				//続ける
+				continueButtonSprite.reset(
+					Sprite::Create(continueButton[1],
+						Vector2(WinApp::kWindowWidth / 2, WinApp::kWindowHeight / 2),
+						Vector4(1, 1, 1, 1),
+						Vector2(0.5f, 0.5f)));
+				//リセット
+				resetButtonSprite.reset(
+					Sprite::Create(resetButton[0],
+						Vector2(WinApp::kWindowWidth / 2, WinApp::kWindowHeight / 1.5f),
+						Vector4(1, 1, 1, 1),
+						Vector2(0.5f, 0.5f)));
+			}
+			else if (isSelect == 1) {
+				//続ける
+				continueButtonSprite.reset(
+					Sprite::Create(continueButton[0],
+						Vector2(WinApp::kWindowWidth / 2, WinApp::kWindowHeight / 2),
+						Vector4(1, 1, 1, 1),
+						Vector2(0.5f, 0.5f)));
+				//リセット
+				resetButtonSprite.reset(
+					Sprite::Create(resetButton[1],
+						Vector2(WinApp::kWindowWidth / 2, WinApp::kWindowHeight / 1.5f),
+						Vector4(1, 1, 1, 1),
+						Vector2(0.5f, 0.5f)));
+			}
 		}
 		//画像変更
 		if (pad.GetTriggerButtons(XINPUT_GAMEPAD_DPAD_DOWN) ||

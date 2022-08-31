@@ -53,6 +53,7 @@ void RailCamera::Reset(Vector3 pos, Vector3 rot)
 
 	startIndex = 1;
 	time = 0;
+	timeRate = 0;
 }
 
 void RailCamera::Update()
