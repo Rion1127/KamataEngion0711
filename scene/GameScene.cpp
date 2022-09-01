@@ -5,6 +5,15 @@
 #include "MathUtility.h"
 #include <cassert>
 #include <fstream>
+#include <timeapi.h>
+#include <minwindef.h>
+
+#include <iostream>
+#include <vector>
+#include <windows.h>
+#include <mmsystem.h>
+#pragma comment(lib, "winmm.lib")
+
 #define XM_PI 3.141592
 
 bool BallCollision(const WorldTransform& a, const WorldTransform& b);
@@ -438,6 +447,23 @@ void GameScene::Update()
 					Vector2(0.5f, 0.5f)));
 		}
 	}
+
+	static int fps = 0;
+	static int lastTime = timeGetTime(); // ms
+	static int frameCount = 0;
+
+	++frameCount;
+
+	int curTime = timeGetTime();
+	if (curTime - lastTime > 1000) //         1 
+	{
+		fps = frameCount;
+		frameCount = 0;
+		lastTime = curTime;
+	}
+	debugText_->SetPos(50, 150);
+	debugText_->Printf(
+		"FPS:(%d)", fps);
 }
 
 void GameScene::Draw() {

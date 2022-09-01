@@ -61,6 +61,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	gameScene = new GameScene();
 	gameScene->Initialize();
 
+	const float MIN_FREAM_TIME = 1.0f / 40;
+	float frameTime = 0;
+	LARGE_INTEGER timeStart;
+	LARGE_INTEGER timeEnd;
+	LARGE_INTEGER timeFreq;
+	// メインループに入る前に精度を取得しておく
+	if (QueryPerformanceFrequency(&timeFreq) == FALSE) { // この関数で0(FALSE)が帰る時は未対応
+		// そもそもQueryPerformanceFrequencyが使えない様な(古い)PCではどうせ色々キツイだろうし
+		return(E_FAIL); // 本当はこんな帰り方しては行けない(後続の解放処理が呼ばれない)
+	}
+	// 1度取得しておく(初回計算用)
+	QueryPerformanceCounter(&timeStart);
+
 	// メインループ
 	while (true) {
 		// メッセージ処理
@@ -85,6 +98,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		primitiveDrawer->Reset();
 		// 描画終了
 		dxCommon->PostDraw();
+
+		// 今の時間を取得
+		QueryPerformanceCounter(&timeEnd);
+		// (今の時間 - 前フレームの時間) / 周波数 = 経過時間(秒単位)
+		frameTime = static_cast<float>(timeEnd.QuadPart - timeStart.QuadPart) / static_cast<float>(timeFreq.QuadPart);
+
+		if (frameTime < MIN_FREAM_TIME) { // 時間に余裕がある
+			// ミリ秒に変換
+			DWORD sleepTime = static_cast<DWORD>((MIN_FREAM_TIME - frameTime) * 1000);
+
+			timeBeginPeriod(1); // 分解能を上げる(こうしないとSleepの精度はガタガタ)
+			Sleep(sleepTime);   // 寝る
+			timeEndPeriod(1);   // 戻す
+		}
+		timeStart = timeEnd; // 入れ替え
 	}
 
 	// 各種解放
