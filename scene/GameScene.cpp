@@ -72,6 +72,8 @@ void GameScene::Initialize() {
 	menuSE = audio_->LoadWave("menuSE.wav");
 	backSE = audio_->LoadWave("backSE.wav");
 
+	clearText = TextureManager::Load("Clear.png");
+
 	//ファイル名を指定してテクスチャを読み込む
 	textureHandle_ = TextureManager::Load("mario.jpg");
 	enemyTextureHandle_ = TextureManager::Load("enemy.jpg");
@@ -206,7 +208,7 @@ void GameScene::Update()
 				for (int i = 0; i < 10; i++) {
 					std::unique_ptr<BurstEffect> newburstEffect = std::make_unique<BurstEffect>();
 					newburstEffect->Ini(model_, enemy->GetWorldTransform());
-					// 弾を登録
+					// エフェクトを登録
 					burstparticle_.emplace_back(std::move(newburstEffect));
 				}
 			}
@@ -226,7 +228,7 @@ void GameScene::Update()
 				for (int i = 0; i < 10; i++) {
 					std::unique_ptr<BurstEffect> newburstEffect = std::make_unique<BurstEffect>();
 					newburstEffect->Ini(model_, enemy->GetWorldTransform());
-					// 弾を登録
+					// エフェクトを登録
 					burstparticle_.emplace_back(std::move(newburstEffect));
 				}
 			}
@@ -296,34 +298,95 @@ void GameScene::Update()
 			audio_->SetVolume(gumishipBGM, bgmVolume);
 			isMenu = true;
 		}
+		if (player_->GetWorldPosition().z >= 1400) {
+			//SE
+			audio_->PlayWave(menuSE, false, 1.5f);
+			//BGM音量調節
+			bgmVolume = 0.5f;
+			audio_->SetVolume(gumishipBGM, bgmVolume);
+			isMenu = true;
+		}
 	}
 	//メニュー
 	else if (isMenu) {
-		//選択せずにゲーム画面に戻る
-		if (pad.GetTriggerButtons(XINPUT_GAMEPAD_START) ||
-			pad.GetTriggerButtons(XINPUT_GAMEPAD_A))
-		{
-			audio_->PlayWave(backSE, false, 1.5f);
-			//BGM音量調節
-			bgmVolume = 1.0f;
-			audio_->SetVolume(gumishipBGM, bgmVolume);
-			isMenu = false;
-		}
-		//選択する
-		if (pad.GetTriggerButtons(XINPUT_GAMEPAD_DPAD_DOWN)) {
-			audio_->PlayWave(selectSE, false, 1.5f);
-			isSelect++;
-			if (isSelect > 1) {
-				isSelect = 0;
+		if (player_->GetWorldPosition().z < 1400) {
+			//選択せずにゲーム画面に戻る
+			if (pad.GetTriggerButtons(XINPUT_GAMEPAD_START) ||
+				pad.GetTriggerButtons(XINPUT_GAMEPAD_A))
+			{
+				audio_->PlayWave(backSE, false, 1.5f);
+				//BGM音量調節
+				bgmVolume = 1.0f;
+				audio_->SetVolume(gumishipBGM, bgmVolume);
+				isMenu = false;
+			}
+			//選択する
+			if (pad.GetTriggerButtons(XINPUT_GAMEPAD_DPAD_DOWN)) {
+				audio_->PlayWave(selectSE, false, 1.5f);
+				isSelect++;
+				if (isSelect > 1) {
+					isSelect = 0;
+				}
+			}
+			if (pad.GetTriggerButtons(XINPUT_GAMEPAD_DPAD_UP)) {
+				audio_->PlayWave(selectSE, false, 1.5f);
+				isSelect--;
+				if (isSelect < 0) {
+					isSelect = 1;
+				}
+			}
+
+			//画像変更
+			if (pad.GetTriggerButtons(XINPUT_GAMEPAD_DPAD_DOWN) ||
+				pad.GetTriggerButtons(XINPUT_GAMEPAD_DPAD_UP)) {
+				if (isSelect == 0) {
+					//続ける
+					continueButtonSprite.reset(
+						Sprite::Create(continueButton[1],
+							Vector2(WinApp::kWindowWidth / 2, WinApp::kWindowHeight / 2),
+							Vector4(1, 1, 1, 1),
+							Vector2(0.5f, 0.5f)));
+					//リセット
+					resetButtonSprite.reset(
+						Sprite::Create(resetButton[0],
+							Vector2(WinApp::kWindowWidth / 2, WinApp::kWindowHeight / 1.5f),
+							Vector4(1, 1, 1, 1),
+							Vector2(0.5f, 0.5f)));
+				}
+				else if (isSelect == 1) {
+					//続ける
+					continueButtonSprite.reset(
+						Sprite::Create(continueButton[0],
+							Vector2(WinApp::kWindowWidth / 2, WinApp::kWindowHeight / 2),
+							Vector4(1, 1, 1, 1),
+							Vector2(0.5f, 0.5f)));
+					//リセット
+					resetButtonSprite.reset(
+						Sprite::Create(resetButton[1],
+							Vector2(WinApp::kWindowWidth / 2, WinApp::kWindowHeight / 1.5f),
+							Vector4(1, 1, 1, 1),
+							Vector2(0.5f, 0.5f)));
+				}
 			}
 		}
-		if (pad.GetTriggerButtons(XINPUT_GAMEPAD_DPAD_UP)) {
-			audio_->PlayWave(selectSE, false, 1.5f);
-			isSelect--;
-			if (isSelect < 0) {
-				isSelect = 1;
-			}
+		//プレイヤーが一番奥に行ったとき
+		else if (player_->GetWorldPosition().z >= 1400) {
+			isSelect = 1;
+			//リセット
+			resetButtonSprite.reset(
+				Sprite::Create(resetButton[1],
+					Vector2(WinApp::kWindowWidth / 2, WinApp::kWindowHeight / 2.0f),
+					Vector4(1, 1, 1, 1),
+					Vector2(0.5f, 0.5f)));
+
+			pauseTextSprite.reset(
+				Sprite::Create(clearText,
+					Vector2(WinApp::kWindowWidth / 2, WinApp::kWindowHeight / 3),
+					Vector4(1, 1, 1, 1),
+					Vector2(0.5f, 0.5f)));
 		}
+
+
 		//決定
 		if (pad.GetTriggerButtons(XINPUT_GAMEPAD_B)) {
 			audio_->PlayWave(enterSE, false, 1.5f);
@@ -368,38 +431,11 @@ void GameScene::Update()
 						Vector4(1, 1, 1, 1),
 						Vector2(0.5f, 0.5f)));
 			}
-		}
-		//画像変更
-		if (pad.GetTriggerButtons(XINPUT_GAMEPAD_DPAD_DOWN) ||
-			pad.GetTriggerButtons(XINPUT_GAMEPAD_DPAD_UP)) {
-			if (isSelect == 0) {
-				//続ける
-				continueButtonSprite.reset(
-					Sprite::Create(continueButton[1],
-						Vector2(WinApp::kWindowWidth / 2, WinApp::kWindowHeight / 2),
-						Vector4(1, 1, 1, 1),
-						Vector2(0.5f, 0.5f)));
-				//リセット
-				resetButtonSprite.reset(
-					Sprite::Create(resetButton[0],
-						Vector2(WinApp::kWindowWidth / 2, WinApp::kWindowHeight / 1.5f),
-						Vector4(1, 1, 1, 1),
-						Vector2(0.5f, 0.5f)));
-			}
-			else if (isSelect == 1) {
-				//続ける
-				continueButtonSprite.reset(
-					Sprite::Create(continueButton[0],
-						Vector2(WinApp::kWindowWidth / 2, WinApp::kWindowHeight / 2),
-						Vector4(1, 1, 1, 1),
-						Vector2(0.5f, 0.5f)));
-				//リセット
-				resetButtonSprite.reset(
-					Sprite::Create(resetButton[1],
-						Vector2(WinApp::kWindowWidth / 2, WinApp::kWindowHeight / 1.5f),
-						Vector4(1, 1, 1, 1),
-						Vector2(0.5f, 0.5f)));
-			}
+			pauseTextSprite.reset(
+				Sprite::Create(pauseText,
+					Vector2(WinApp::kWindowWidth / 2, WinApp::kWindowHeight / 3),
+					Vector4(1, 1, 1, 1),
+					Vector2(0.5f, 0.5f)));
 		}
 	}
 }
@@ -492,7 +528,9 @@ void GameScene::Draw() {
 	if (isMenu) {
 		pauseScreen->Draw();
 		pauseTextSprite->Draw();
-		continueButtonSprite->Draw();
+		if (player_->GetWorldPosition().z < 1400) {
+			continueButtonSprite->Draw();
+		}
 		resetButtonSprite->Draw();
 	}
 	//

@@ -79,7 +79,7 @@ void Player::Update()
 {
 	pad.Update();
 	Move();
-	Rotation();
+	//Rotation();
 	Attack();
 	//弾更新
 	for (std::unique_ptr<PlayerBullet>& bullet : bullets_) {
@@ -98,7 +98,6 @@ void Player::Update()
 	}
 
 	//パーティクル生成、初期化
-
 	if (particle_.size() < 10) {
 		std::unique_ptr<EngineParticle> newParticle = std::make_unique<EngineParticle>();
 		newParticle->Ini(worldTransform_);
@@ -154,11 +153,11 @@ void Player::Draw(ViewProjection viewProjection_)
 	//ReticleModel->Draw(reticlePosition, viewProjection_);
 
 	//デバッグ表示
-	debugText_->SetPos(50, 150);
+	/*debugText_->SetPos(50, 150);
 	debugText_->Printf(
 		"player:(%f,%f,%f)", GetWorldPosition().x,
 		GetWorldPosition().y,
-		GetWorldPosition().z);
+		GetWorldPosition().z);*/
 	////デバッグ表示
 	//debugText_->SetPos(50, 170);
 	//debugText_->Printf(
@@ -328,19 +327,19 @@ void Player::Move()
 	//position = ease_in_out(a, b, nowtime);*/
 	//position = SplinePosition(points, startIndex, timeRate);
 #pragma region 移動
-	//押した方向で移動ベクトルを変更
-	if (input_->PushKey(DIK_A)) {
-		move = { -playerSpeed,0,0 };
-	}
-	else if (input_->PushKey(DIK_D)) {
-		move = { playerSpeed,0,0 };
-	}
-	if (input_->PushKey(DIK_W)) {
-		move = { 0,playerSpeed,0 };
-	}
-	else if (input_->PushKey(DIK_S)) {
-		move = { 0,-playerSpeed,0 };
-	}
+	////押した方向で移動ベクトルを変更
+	//if (input_->PushKey(DIK_A)) {
+	//	move = { -playerSpeed,0,0 };
+	//}
+	//else if (input_->PushKey(DIK_D)) {
+	//	move = { playerSpeed,0,0 };
+	//}
+	//if (input_->PushKey(DIK_W)) {
+	//	move = { 0,playerSpeed,0 };
+	//}
+	//else if (input_->PushKey(DIK_S)) {
+	//	move = { 0,-playerSpeed,0 };
+	//}
 
 	//Lスティックで移動する
 	Vector2 speed;
@@ -480,7 +479,7 @@ void Player::Attack()
 {
 	cooltime--;
 	if (cooltime <= 0) {
-		if (input_->TriggerKey(DIK_SPACE) || pad.GetButtons(XINPUT_GAMEPAD_B)) {
+		if (/*input_->TriggerKey(DIK_SPACE) ||*/ pad.GetButtons(XINPUT_GAMEPAD_B)) {
 			audio_->PlayWave(shotSE);
 			Vector3 pos =
 			{ worldTransform_.matWorld_.m[3][0],

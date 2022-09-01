@@ -127,12 +127,12 @@ void Enemy2::Draw(const ViewProjection& viewProjection)
 
 	
 	//デバッグ表示
-	debugText_->SetPos(50, 190);
+	/*debugText_->SetPos(50, 190);
 	debugText_->Printf(
 		"enemyPos:(%f,%f,%f)",
 		worldTransform_.translation_.x,
 		worldTransform_.translation_.y,
-		worldTransform_.translation_.z);
+		worldTransform_.translation_.z);*/
 
 	//debugText_->SetPos(50, 210);
 	//debugText_->Printf(
