@@ -45,9 +45,9 @@ void EngineParticle::Ini( WorldTransform worldtransform)
 	std::random_device seed_gen;
 	std::mt19937_64 engine(seed_gen());
 	//—””ÍˆÍ‚Ìw’è
-	std::uniform_real_distribution<float> x(-0.05f, 0.05f);
-	std::uniform_real_distribution<float> y(-0.05f, 0.05f);
-	std::uniform_real_distribution<float> z(-0.02f, -0.02f);
+	std::uniform_real_distribution<float> x(-0.07f, 0.07f);
+	std::uniform_real_distribution<float> y(-0.07f, 0.07f);
+	std::uniform_real_distribution<float> z(-0.04f, -0.04f);
 	
 	velocity_ = { x(engine),y(engine),z(engine)};
 	
@@ -56,8 +56,6 @@ void EngineParticle::Ini( WorldTransform worldtransform)
 
 void EngineParticle::Update()
 {
-	
-
 	worldTransform_.AddPosition(velocity_);
 	matrix.UpdateMatrix(worldTransform_);
 
@@ -107,9 +105,9 @@ void BurstEffect::Ini(Model* model ,WorldTransform worldtransform)
 	std::random_device seed_gen;
 	std::mt19937_64 engine(seed_gen());
 	//—””ÍˆÍ‚Ìw’è
-	std::uniform_real_distribution<float> x(-0.05f, 0.05f);
-	std::uniform_real_distribution<float> y(-0.05f, 0.05f);
-	std::uniform_real_distribution<float> z(-0.05f, 0.05f);
+	std::uniform_real_distribution<float> x(-0.1f, 0.1f);
+	std::uniform_real_distribution<float> y(-0.1f, 0.1f);
+	std::uniform_real_distribution<float> z(-0.1f, 0.1f);
 
 	velocity_ = { x(engine),y(engine),z(engine) };
 }

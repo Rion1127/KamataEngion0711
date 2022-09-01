@@ -461,9 +461,9 @@ void GameScene::Update()
 		frameCount = 0;
 		lastTime = curTime;
 	}
-	debugText_->SetPos(50, 150);
+	/*debugText_->SetPos(50, 150);
 	debugText_->Printf(
-		"FPS:(%d)", fps);
+		"FPS:(%d)", fps);*/
 }
 
 void GameScene::Draw() {
@@ -749,7 +749,7 @@ void GameScene::UpdateEnemyPopCommands()
 
 			//待機開始
 			isWait = true;
-			waitTimer = waitTime;
+			waitTimer = waitTime / 2.2f;
 			//コマンドループを抜ける
 			break;
 		}

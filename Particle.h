@@ -20,7 +20,7 @@ private:
 	Model* Model_ = nullptr;
 	Vector3 velocity_;
 	uint32_t textureHandle_;
-	const int MaxParticleAlive = 15;
+	const int MaxParticleAlive = 7;
 	int particleAliveTime = MaxParticleAlive;
 	bool isDead = false;
 };
@@ -42,7 +42,7 @@ private:
 	Model* Model_ = nullptr;
 	Vector3 velocity_;
 	uint32_t textureHandle_;
-	const int MaxParticleAlive = 80;
+	const int MaxParticleAlive = 40;
 	int particleAliveTime = MaxParticleAlive;
 	bool isDead = false;
 

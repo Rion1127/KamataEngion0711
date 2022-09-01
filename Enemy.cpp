@@ -132,7 +132,7 @@ void Enemy::Shot()
 	assert(player_);
 
 	// 弾の速度
-	const float kBulletSpped = 0.5f;
+	const float kBulletSpped = 1.0f;
 
 	// 差分ベクトルを格納する変数
 	Vector3 diffVec;

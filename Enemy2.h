@@ -70,7 +70,7 @@ private:
 
 	Player* player_ = nullptr;
 
-	const int maxCollisionCoolTime = 20;
+	const int maxCollisionCoolTime = 10;
 	int collisionCoolTime;
 	
 

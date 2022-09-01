@@ -88,7 +88,7 @@ private:
 	//p1からスタートする
 	size_t startIndex = 1;
 
-	const int maxCollisionCoolTime = 40;
+	const int maxCollisionCoolTime = 20;
 	int collisionCoolTime = maxCollisionCoolTime;
 
 	//レティクル
@@ -101,7 +101,7 @@ private:
 	
 	//パーティクル
 	std::list<std::unique_ptr<EngineParticle>> particle_;
-	const int MaxParticleCoolTime = 2;
+	const int MaxParticleCoolTime = 1;
 	int particleCooltime = MaxParticleCoolTime;
 	
 	uint32_t shotSE;

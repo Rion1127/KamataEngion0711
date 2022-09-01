@@ -78,12 +78,12 @@ private:
 	//’e
 	std::list<std::unique_ptr<EnemyBullet>> bullets_;
 	//ShotTimer
-	static const int kFireInterval = 360;
+	static const int kFireInterval = 180;
 	int32_t shotCoolTime = 0;
 
 	Player* player_ = nullptr;
 
-	const int maxCollisionCoolTime = 15;
+	const int maxCollisionCoolTime = 10;
 	int collisionCoolTime;
 	int num;
 
