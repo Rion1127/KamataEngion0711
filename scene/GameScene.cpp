@@ -83,6 +83,13 @@ void GameScene::Initialize() {
 
 	clearText = TextureManager::Load("Clear.png");
 
+	controllerHandle = TextureManager::Load("controller.png");
+	controllerSprite.reset(
+		Sprite::Create(controllerHandle,
+			Vector2(0, WinApp::kWindowHeight),
+			Vector4(1, 1, 1, 1),
+			Vector2(0, 1.0f)));
+
 	//ファイル名を指定してテクスチャを読み込む
 	textureHandle_ = TextureManager::Load("mario.jpg");
 	enemyTextureHandle_ = TextureManager::Load("enemy.jpg");
@@ -183,6 +190,8 @@ void GameScene::Initialize() {
 	IniObjData();
 
 	isSelect = 0;
+
+
 }
 
 void GameScene::Update()
@@ -221,7 +230,9 @@ void GameScene::Update()
 					burstparticle_.emplace_back(std::move(newburstEffect));
 				}
 			}
-
+		}
+		for (std::unique_ptr<BurstEffect>& effect : burstparticle_) {
+			effect->Update();
 		}
 		//デスフラグの立った敵を削除
 		enemys_.remove_if([](std::unique_ptr<Enemy>& enemys_) {
@@ -247,9 +258,7 @@ void GameScene::Update()
 			return enemys_->IsDead();
 			});
 
-		for (std::unique_ptr<BurstEffect>& effect : burstparticle_) {
-			effect->Update();
-		}
+		
 		//デスフラグの立ったエフェクトを削除
 		burstparticle_.remove_if([](std::unique_ptr<BurstEffect>& effect) {
 			return effect->GetDead();
@@ -547,6 +556,7 @@ void GameScene::Draw() {
 	/// ここに前景スプライトの描画処理を追加できる
 	/// </summary>
 	player_->DrawUI();
+	controllerSprite->Draw();
 
 	// デバッグテキストの描画
 	debugText_->DrawAll(commandList);
@@ -554,6 +564,7 @@ void GameScene::Draw() {
 	if (isMenu) {
 		pauseScreen->Draw();
 		pauseTextSprite->Draw();
+		
 		if (player_->GetWorldPosition().z < 1400) {
 			continueButtonSprite->Draw();
 		}
@@ -749,7 +760,7 @@ void GameScene::UpdateEnemyPopCommands()
 
 			//待機開始
 			isWait = true;
-			waitTimer = waitTime / 2.2f;
+			waitTimer = waitTime / 2.7f;
 			//コマンドループを抜ける
 			break;
 		}

@@ -61,7 +61,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	gameScene = new GameScene();
 	gameScene->Initialize();
 
-	const float MIN_FREAM_TIME = 1.0f / 40;
+	const float MIN_FREAM_TIME = 1.0f / 35.0f;
 	float frameTime = 0;
 	LARGE_INTEGER timeStart;
 	LARGE_INTEGER timeEnd;

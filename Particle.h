@@ -40,6 +40,7 @@ private:
 	WorldTransform worldTransform_;
 	Matrix matrix;
 	Model* Model_ = nullptr;
+	Vector3 rotVelocity;
 	Vector3 velocity_;
 	uint32_t textureHandle_;
 	const int MaxParticleAlive = 40;

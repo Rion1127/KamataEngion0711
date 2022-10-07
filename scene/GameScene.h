@@ -193,4 +193,6 @@ class GameScene {
 	float bgmVolume;
 	//パーティクル
 	std::list<std::unique_ptr<BurstEffect>> burstparticle_;
+	uint32_t controllerHandle;
+	std::unique_ptr <Sprite> controllerSprite;
 };

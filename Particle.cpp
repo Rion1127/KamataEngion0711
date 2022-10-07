@@ -110,10 +110,17 @@ void BurstEffect::Ini(Model* model ,WorldTransform worldtransform)
 	std::uniform_real_distribution<float> z(-0.1f, 0.1f);
 
 	velocity_ = { x(engine),y(engine),z(engine) };
+
+	//óêêîîÕàÕÇÃéwíË
+	std::uniform_real_distribution<float> scalex(-0.002f, -0.002f);
+	std::uniform_real_distribution<float> scaley(-0.002f, -0.002f);
+	std::uniform_real_distribution<float> scalez(-0.002f, -0.002f);
+	rotVelocity = { scalex(engine),scaley(engine),scalez(engine) };
 }
 
 void BurstEffect::Update()
 {
+	worldTransform_.AddScale(rotVelocity);
 	worldTransform_.AddRotation(velocity_);
 	worldTransform_.AddPosition(velocity_);
 	matrix.UpdateMatrix(worldTransform_);

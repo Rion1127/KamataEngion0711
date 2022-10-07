@@ -343,8 +343,8 @@ void Player::Move()
 
 	//Lスティックで移動する
 	Vector2 speed;
-	speed.x += pad.GetLStick().x * 0.000006f;
-	speed.y -= pad.GetLStick().y * 0.000006f;
+	speed.x += pad.GetLStick().x * 0.000008f;
+	speed.y -= pad.GetLStick().y * 0.000008f;
 	speed.y *= 0.6f;
 
 	if (speed.x >= 0.6f) {
@@ -493,7 +493,7 @@ void Player::Attack()
 			// 速度ベクトルを自機の向きに合わせて回転させる
 			velocity = transform(velocity, worldTransform_.matWorld_);
 			velocity.normalize();
-			velocity *= kBulletSpeed * 1.3f;
+			velocity *= kBulletSpeed * 1.4f;
 
 			// 弾生成、初期化
 			std::unique_ptr<PlayerBullet> newBullet = std::make_unique<PlayerBullet>();
@@ -502,7 +502,7 @@ void Player::Attack()
 			// 弾を登録
 			bullets_.emplace_back(std::move(newBullet));
 
-			cooltime = 7.5f;
+			cooltime = 6;
 		}
 	}
 

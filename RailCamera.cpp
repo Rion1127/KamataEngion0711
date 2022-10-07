@@ -110,7 +110,7 @@ void RailCamera::Move()
 		}
 	}
 	//0.13f;
-	time += 0.30f;
+	time += 0.36f;
 	//timeRate / FPS　で1秒のカウントをnowTimeに代入する 
 	timeRate = time / 120;
 

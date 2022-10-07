@@ -170,7 +170,7 @@ void Enemy2::OnCollisioin(uint32_t hitSE)
 void Enemy2::phase_OverTake()
 {
 	//プレイヤーを追い越す
-	Vector3 speed = { 0,0,0.2f };
+	Vector3 speed = { 0,0,0.5f };
 
 	worldTransform_.translation_ += speed;
 
@@ -186,7 +186,7 @@ void Enemy2::phase_AssaultIni()
 	AssaultVec = player_->GetWorldPosition() - worldTransform_.translation_;
 	AssaultVec.z = AssaultVec.z + 15.0f;
 	//プレイヤーに突撃する
-	float speed = 0.2f;
+	float speed = 0.5f;
 
 	AssaultVec.normalize();
 	AssaultVec *= speed;
